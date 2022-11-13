@@ -1,6 +1,4 @@
 import React, { useRef, useState } from 'react';
-import ListItem from './ListItem';
-import { User } from '../interfaces';
 import Collapse from './Collapse';
 
 type DirectoryStructure = {
@@ -58,8 +56,6 @@ const SideBar: React.FC<Props> = ({ directoryStructure }: Props) => {
                 style={{ minWidth: '8px' }}
                 draggable
                 onDrag={(e) => {
-                    console.log(e.clientX);
-                    console.log(positionX);
                     if (e.clientX !== 0) {
                         if (e.clientX <= 100) {
                             setPositionX(20);

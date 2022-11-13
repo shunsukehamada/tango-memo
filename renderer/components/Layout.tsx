@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
-import Link from 'next/link';
-import Head from 'next/head';
 import SideBar from './SideBar';
+import List, { Word } from './List';
 
 type Props = {
     children: ReactNode;
@@ -9,8 +8,14 @@ type Props = {
 };
 
 const Layout = ({ children, title = 'This is the default title' }: Props) => {
+    const words: Word[] = [
+        { id: '0', english: 'hello', japanese: 'おはよう' },
+        { id: '1', english: 'banana', japanese: 'バナナ' },
+        { id: '2', english: 'apple', japanese: 'りんご' },
+        { id: '3', english: 'protein', japanese: 'タンパク質' },
+    ];
     return (
-        <div>
+        <div className="flex">
             <SideBar
                 directoryStructure={[
                     { parent: 'folder1', children: ['folder1-1', 'folder1-2'] },
@@ -20,6 +25,9 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
                     },
                 ]}
             />
+            <div className="flex-1">
+                <List items={words} />
+            </div>
         </div>
     );
 };
