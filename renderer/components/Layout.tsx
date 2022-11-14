@@ -3,12 +3,7 @@ import SideBar from './SideBar';
 import List, { Word } from './List';
 import { resetServerContext } from 'react-beautiful-dnd';
 
-type Props = {
-    children: ReactNode;
-    title?: string;
-};
-
-const Layout = ({ children, title = 'This is the default title' }: Props) => {
+const Layout = () => {
     const words: Word[] = [];
 
     // build時は削除
@@ -81,7 +76,7 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => {
         words.push({ id: i, ...dummy[i] });
     }
     return (
-        <div className="flex">
+        <div className="flex overflow-y-hidden">
             <SideBar
                 directoryStructure={[
                     { parent: 'folder1', children: ['folder1-1', 'folder1-2'] },
