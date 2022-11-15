@@ -77,15 +77,17 @@ const Layout = () => {
     }
     return (
         <div className="flex overflow-y-hidden">
-            <SideBar
-                directoryStructure={[
-                    { parent: 'folder1', children: ['folder1-1', 'folder1-2'] },
-                    {
-                        parent: 'folder2',
-                        children: ['folder2-1', 'folder2-2', 'folder2-3'],
-                    },
-                ]}
-            />
+            <div className='h-screen flex items-center'>
+                <SideBar
+                    directoryStructure={[
+                        { parent: 'folder1', children: ['folder1-1', 'folder1-2'] },
+                        {
+                            parent: 'folder2',
+                            children: ['folder2-1', 'folder2-2', 'folder2-3'],
+                        },
+                    ]}
+                />
+            </div>
             <div className="flex-1">{winReady && <List items={words} />}</div>
             {/* <div className="flex-1">
                 <List items={words} />
