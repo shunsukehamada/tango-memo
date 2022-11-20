@@ -10,11 +10,11 @@ export type DirectoryStructure = {
 
 type Props = {
     directoryStructure: DirectoryStructure[];
-    setDirectoryStructure: React.Dispatch<React.SetStateAction<DirectoryStructure[]>>
+    setDirectoryStructure: React.Dispatch<React.SetStateAction<DirectoryStructure[]>>;
+    getWords: (parentFolder: string, folder: string) => Promise<void>;
 };
 
-// TODO: 単語を取得
-const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure }: Props) => {
+const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords }: Props) => {
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     // const [directoryStructure, setDirectoryStructure] = useState<DirectoryStructure[]>(directoryStructure);
     const [isOpenStates, setIsOpenStates] = useState<boolean[]>(Array(directoryStructure.length).fill(false));
@@ -131,9 +131,9 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure }:
                                                                 onSubmit={(e) => {
                                                                     e.preventDefault();
                                                                     if (
-                                                                        directoryStructure[
-                                                                            index
-                                                                        ].children.includes(newFolderNameInputValue) ||
+                                                                        directoryStructure[index].children.includes(
+                                                                            newFolderNameInputValue
+                                                                        ) ||
                                                                         newFolderNameInputValue === ''
                                                                     ) {
                                                                         return;
@@ -164,8 +164,11 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure }:
                                                             <div
                                                                 key={child}
                                                                 className="ml-4 my-1 flex before:content-['>']"
+                                                                onClick={() => {
+                                                                    getWords(directory.parent, child);
+                                                                }}
                                                             >
-                                                                <li key={child} className="ml-1  cursor-pointer">
+                                                                <li className="ml-1  cursor-pointer">
                                                                     <span className="text-lg inline-block whitespace-nowrap">
                                                                         {child}
                                                                     </span>

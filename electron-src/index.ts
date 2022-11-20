@@ -13,6 +13,12 @@ type DirectoryStructure = {
     children: string[];
 };
 
+type Word = {
+    id: number;
+    english: string;
+    japanese: string;
+};
+
 // Prepare the renderer once the app is ready
 app.on('ready', async () => {
     await prepareNext('./renderer');
@@ -43,7 +49,9 @@ app.on('window-all-closed', app.quit);
 
 // listen the channel `message` and resend the received message to the renderer process
 ipcMain.handle('sample', async () => {
-    const db = new sqlite3.Database(path.join(__dirname, 'db', 'sample.db'));
+    const db = new sqlite3.Database(
+        isDev ? path.join(__dirname, 'db', 'sample.db') : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
 
     const words: { id: number; english: string; japanese: string }[] = await new Promise<
         { id: number; english: string; japanese: string }[]
@@ -61,7 +69,9 @@ ipcMain.handle('sample', async () => {
 });
 
 ipcMain.handle('get-all-folders', async () => {
-    const db = new sqlite3.Database(path.join(__dirname, 'db', 'sample.db'));
+    const db = new sqlite3.Database(
+        isDev ? path.join(__dirname, 'db', 'sample.db') : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
     const parentFolders: { id: number; name: string }[] = await new Promise((resolve, reject) => {
         db.all('select * from parent_folders', (err, rows) => {
             if (err) {
@@ -89,7 +99,47 @@ ipcMain.handle('get-all-folders', async () => {
         directoryStructure.push(directory);
     }
 
+    db.close();
     return directoryStructure;
 });
 
-ipcMain.handle('get-words', (_e, folderId: number) => {});
+ipcMain.handle('get-words', async (_e, parentFolder: string, folder: string): Promise<Word[]> => {
+    const db = new sqlite3.Database(
+        isDev ? path.join(__dirname, 'db', 'sample.db') : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const parentId: number = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from parent_folders where name = ?',
+            parentFolder,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    const folderId: number = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from folders where parent_id = ? and name = ?',
+            parentId,
+            folder,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    const words: Word[] = await new Promise<Word[]>((resolve, reject) => {
+        db.all('select * from words where folder_id = ?', folderId, (err: Error | null, row: Word[]) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row);
+        });
+    });
+
+    return words;
+});
