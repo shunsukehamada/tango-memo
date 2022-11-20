@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import SideBar from './SideBar';
+import SideBar, { DirectoryStructure } from './SideBar';
 import List, { Word } from './List';
 import { resetServerContext } from 'react-beautiful-dnd';
 
@@ -8,8 +8,14 @@ const Layout = () => {
 
     // build時は削除
     const [winReady, setWinReady] = useState(false);
+    const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
     useEffect(() => {
         setWinReady(true);
+        const getAllFolders = async () => {
+            const allFolders = await global.ipcRenderer.invoke('get-all-folders');
+            setDirectoryStructureState(allFolders);
+        };
+        getAllFolders();
     }, []);
 
     const dummy = [
@@ -77,15 +83,10 @@ const Layout = () => {
     }
     return (
         <div className="flex overflow-y-hidden">
-            <div className='h-screen flex items-center'>
+            <div className="h-screen flex items-center">
                 <SideBar
-                    directoryStructure={[
-                        { parent: 'folder1', children: ['folder1-1', 'folder1-2'] },
-                        {
-                            parent: 'folder2',
-                            children: ['folder2-1', 'folder2-2', 'folder2-3'],
-                        },
-                    ]}
+                    directoryStructure={directoryStructureState}
+                    setDirectoryStructure={setDirectoryStructureState}
                 />
             </div>
             <div className="flex-1">{winReady && <List items={words} />}</div>

@@ -65,7 +65,7 @@ const IndexPage = () => {
                         }
                     }}
                 >
-                    <Layout></Layout>
+                    <Layout />
                 </motion.div>
             </AnimatePresence>
         </>

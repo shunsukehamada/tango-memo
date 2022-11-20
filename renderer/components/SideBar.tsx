@@ -3,18 +3,20 @@ import { MdCreateNewFolder, MdOutlineCreateNewFolder } from 'react-icons/md';
 import { VscCollapseAll, VscNewFolder } from 'react-icons/vsc';
 import Collapse from './Collapse';
 
-type DirectoryStructure = {
+export type DirectoryStructure = {
     parent: string;
     children: string[];
 };
 
 type Props = {
     directoryStructure: DirectoryStructure[];
+    setDirectoryStructure: React.Dispatch<React.SetStateAction<DirectoryStructure[]>>
 };
 
-const SideBar: React.FC<Props> = ({ directoryStructure }: Props) => {
+// TODO: 単語を取得
+const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure }: Props) => {
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
-    const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>(directoryStructure);
+    // const [directoryStructure, setDirectoryStructure] = useState<DirectoryStructure[]>(directoryStructure);
     const [isOpenStates, setIsOpenStates] = useState<boolean[]>(Array(directoryStructure.length).fill(false));
     const [isSelectedStates, setIsSelectedStates] = useState<boolean[]>(Array(directoryStructure.length).fill(false));
     const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
@@ -101,7 +103,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure }: Props) => {
                             <VscCollapseAll size={'2em'} />
                         </div>
                     </div>
-                    {directoryStructureState.map((directory, index) => {
+                    {directoryStructure.map((directory, index) => {
                         return (
                             <div key={directory.parent} className="w-full">
                                 <div className="pl-1 pt-3 overflow-hidden flex flex-col items-start">
@@ -129,18 +131,18 @@ const SideBar: React.FC<Props> = ({ directoryStructure }: Props) => {
                                                                 onSubmit={(e) => {
                                                                     e.preventDefault();
                                                                     if (
-                                                                        directoryStructureState[
+                                                                        directoryStructure[
                                                                             index
                                                                         ].children.includes(newFolderNameInputValue) ||
                                                                         newFolderNameInputValue === ''
                                                                     ) {
                                                                         return;
                                                                     }
-                                                                    const newStates = [...directoryStructureState];
+                                                                    const newStates = [...directoryStructure];
                                                                     newStates[index].children.push(
                                                                         newFolderNameInputValue
                                                                     );
-                                                                    setDirectoryStructureState(newStates);
+                                                                    setDirectoryStructure(newStates);
                                                                     setNewFolderNameInputValue('');
                                                                     setIsCreatingNewFolder(false);
                                                                 }}
@@ -198,7 +200,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure }: Props) => {
                                     onSubmit={(e) => {
                                         e.preventDefault();
                                         if (
-                                            directoryStructureState
+                                            directoryStructure
                                                 .map((directory) => {
                                                     return directory.parent;
                                                 })
@@ -207,9 +209,9 @@ const SideBar: React.FC<Props> = ({ directoryStructure }: Props) => {
                                         ) {
                                             return;
                                         }
-                                        const newStates = [...directoryStructureState];
+                                        const newStates = [...directoryStructure];
                                         newStates.push({ parent: newFolderNameInputValue, children: [] });
-                                        setDirectoryStructureState(newStates);
+                                        setDirectoryStructure(newStates);
                                         setNewFolderNameInputValue('');
                                         setIsCreatingNewFolder(false);
                                     }}
