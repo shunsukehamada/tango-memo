@@ -172,7 +172,6 @@ ipcMain.handle('get-words', async (_e, parentFolder: string, folder: string): Pr
     return words;
 });
 
-// TODO: 品詞の登録
 ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, folder, pos }: Inputs) => {
     const db = new sqlite3.Database(
         isDev
@@ -231,4 +230,38 @@ ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, fold
             }
         });
     }
+});
+
+ipcMain.on('create-new-parent-folder', (_e, folder: string) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    db.run('insert into parent_folders(name) values(?)', folder);
+});
+
+ipcMain.on('create-new-folder', async (_e, parentFolder: string, folder: string) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const parentId = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from parent_folders where name = ?',
+            parentFolder,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    db.run('insert into folders(name, parent_id) values(?, ?)', [folder, parentId], (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
 });

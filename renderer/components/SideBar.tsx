@@ -145,6 +145,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                                                     setDirectoryStructure(newStates);
                                                                     setNewFolderNameInputValue('');
                                                                     setIsCreatingNewFolder(false);
+                                                                    global.ipcRenderer.send("create-new-folder",newStates[index].parent ,newFolderNameInputValue)
                                                                 }}
                                                             >
                                                                 <input
@@ -217,6 +218,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                         setDirectoryStructure(newStates);
                                         setNewFolderNameInputValue('');
                                         setIsCreatingNewFolder(false);
+                                        global.ipcRenderer.send('create-new-parent-folder', newFolderNameInputValue);
                                     }}
                                     className="w-full m-2"
                                 >

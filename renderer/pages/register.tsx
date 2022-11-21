@@ -198,7 +198,6 @@ const Register: React.FC = () => {
                                                 },
                                             }}
                                             onChange={field.onChange}
-                                            // defaultValue={watch("folder")}
                                         />
                                     </>
                                 );
