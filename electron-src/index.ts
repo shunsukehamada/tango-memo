@@ -19,6 +19,17 @@ type Word = {
     japanese: string;
 };
 
+type PoSs = {
+    Noun: '名詞';
+    Verb: '動詞';
+    Adjective: '形容詞';
+    Adverb: '副詞';
+    Conjunction: '接続詞';
+    Pronoun: '代名詞';
+    Preposition: '前置詞';
+    Interjection: '感動詞';
+};
+
 type Inputs = {
     english: string;
     japanese: string;
@@ -27,7 +38,7 @@ type Inputs = {
         label: string;
         value: { parent: string; child: string };
     };
-    // pos: (keyof PoSs)[];
+    pos: (keyof PoSs)[];
 };
 
 // Prepare the renderer once the app is ready
@@ -161,7 +172,8 @@ ipcMain.handle('get-words', async (_e, parentFolder: string, folder: string): Pr
     return words;
 });
 
-ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, folder }: Inputs) => {
+// TODO: 品詞の登録
+ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, folder, pos }: Inputs) => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
@@ -192,13 +204,31 @@ ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, fold
             }
         );
     });
-    db.run(
-        'insert into words(english, japanese, annotation, folder_id) values(?, ?, ?, ?)',
-        [english, japanese, annotation, folderId],
-        (err) => {
+    const id: number = await new Promise<number>((resolve, reject) => {
+        db.run(
+            'insert into words(english, japanese, annotation, folder_id) values(?, ?, ?, ?)',
+            [english, japanese, annotation, folderId],
+            function (err) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(this.lastID);
+            }
+        );
+    });
+    for (const posName of pos) {
+        const posId: number = await new Promise<number>((resolve, reject) => {
+            db.get('select id from poss where pos = ?', posName, (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            });
+        });
+        db.run('insert into words_poss(words_id, poss_id) values(?, ?)', [id, posId], (err) => {
             if (err) {
                 console.error(err);
             }
-        }
-    );
+        });
+    }
 });

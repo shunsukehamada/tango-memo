@@ -1,3 +1,4 @@
+-- 品詞の登録
 CREATE TABLE IF NOT EXISTS parent_folders (
     id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
     name TEXT UNIQUE NOT NULL,
@@ -29,5 +30,6 @@ CREATE TABLE IF NOT EXISTS poss (
 
 create TABLE IF NOT EXISTS words_poss (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    words_id INTEGER poss_id INTEGER
+    words_id INTEGER NOT NULL,
+    poss_id INTEGER NOT NULL
 );

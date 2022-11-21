@@ -83,4 +83,8 @@ toeflDb.serialize(() => {
         });
     });
 });
-// db.run('insert into folder() values');
+sampleDb.serialize(() => {
+    ['Noun', 'Verb', 'Adjective', 'Adverb', 'Conjunction', 'Pronoun', 'Preposition', 'Interjection'].map((pos) => {
+        sampleDb.run('insert into poss(pos) values(?)', pos);
+    });
+});
