@@ -1,15 +1,19 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, AnimationProps, BoundingBox, motion } from 'framer-motion';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import Select, { GroupProps, OptionsOrGroups } from 'react-select';
 import { RiPencilFill } from 'react-icons/ri';
+import { DirectoryStructure } from '../components/SideBar';
 type Inputs = {
     english: string;
     japanese: string;
     annotation: string;
-    folder: string;
+    folder: {
+        label: string;
+        value: { parent: string; child: string };
+    };
     pos: (keyof PoSs)[];
 };
 
@@ -27,6 +31,7 @@ type PoSs = {
 const Register: React.FC = () => {
     const router = useRouter();
     const [isTransitioned, setIsTransitioned] = useState(false);
+    const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
 
     if (typeof document !== 'undefined') {
         document.addEventListener('wheel', (e) => {
@@ -35,6 +40,13 @@ const Register: React.FC = () => {
             }
         });
     }
+    useEffect(() => {
+        const getAllFolders = async () => {
+            const allFolders = (await global.ipcRenderer.invoke('get-all-folders')) as DirectoryStructure[];
+            setDirectoryStructureState(allFolders);
+        };
+        getAllFolders();
+    }, []);
     const slideInAnimationConfig: AnimationProps = {
         animate: isTransitioned
             ? { transition: { duration: 0 }, x: '0%' }
@@ -64,8 +76,13 @@ const Register: React.FC = () => {
         watch,
         control,
         formState: { errors },
+        reset,
     } = useForm<Inputs>({ mode: 'all', defaultValues: { japanese: '', pos: [] } });
-    const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+
+    const onSubmit: SubmitHandler<Inputs> = (data) => {
+        global.ipcRenderer.send('register-new-word', data);
+        reset();
+    };
 
     const PoSs: PoSs = {
         Noun: '名詞',
@@ -82,21 +99,16 @@ const Register: React.FC = () => {
     const rows = textareaValue?.split(/\r*\n/).length;
 
     const options = [
-        {
-            label: 'folder1',
-            options: [
-                { label: 'folder1-1', value: { parent: 'folder1', child: 'folder1-1' } },
-                { label: 'folder1-2', value: { parent: 'folder1', child: 'folder1-2' } },
-            ],
-        },
-        {
-            label: 'folder2',
-            options: [
-                { label: 'folder2-1', value: { parent: 'folder2', child: 'folder2-1' } },
-                { label: 'folder2-2', value: { parent: 'folder2', child: 'folder2-2' } },
-                { label: 'folder2-3', value: { parent: 'folder2', child: 'folder2-3' } },
-            ],
-        },
+        ...directoryStructureState.map((directory) => {
+            return {
+                label: directory.parent,
+                options: [
+                    ...directory.children.map((folder) => {
+                        return { label: folder, value: { parent: directory.parent, child: folder } };
+                    }),
+                ],
+            };
+        }),
     ];
     const formRef = useRef();
     return (
@@ -186,6 +198,7 @@ const Register: React.FC = () => {
                                                 },
                                             }}
                                             onChange={field.onChange}
+                                            // defaultValue={watch("folder")}
                                         />
                                     </>
                                 );

@@ -19,6 +19,17 @@ type Word = {
     japanese: string;
 };
 
+type Inputs = {
+    english: string;
+    japanese: string;
+    annotation: string;
+    folder: {
+        label: string;
+        value: { parent: string; child: string };
+    };
+    // pos: (keyof PoSs)[];
+};
+
 // Prepare the renderer once the app is ready
 app.on('ready', async () => {
     await prepareNext('./renderer');
@@ -148,4 +159,46 @@ ipcMain.handle('get-words', async (_e, parentFolder: string, folder: string): Pr
     });
 
     return words;
+});
+
+ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, folder }: Inputs) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const parentId: number = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from parent_folders where name = ?',
+            folder.value.parent,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    const folderId: number = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from folders where parent_id = ? and name = ?',
+            parentId,
+            folder.label,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    db.run(
+        'insert into words(english, japanese, annotation, folder_id) values(?, ?, ?, ?)',
+        [english, japanese, annotation, folderId],
+        (err) => {
+            if (err) {
+                console.error(err);
+            }
+        }
+    );
 });
