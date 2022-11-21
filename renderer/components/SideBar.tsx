@@ -71,7 +71,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full py-2 relative">
             <div
-                className="grow-0 shrink-0 flex border-r-2 border-y-2 border-solid border-gray-400 flex-row bg-white rounded-r-lg"
+                className="grow-0 shrink-0 flex border-r-2 border-solid border-gray-400 flex-row bg-white my-2"
                 ref={sidebarRef}
                 style={{
                     width: sidebarWidth,
@@ -85,7 +85,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                 }}
             >
                 <div className="flex-1 overflow-hidden">
-                    <div className="flex justify-end">
+                    <div className="flex justify-end border-y-2 border-solid border-gray-300 py-1">
                         <div
                             className="px-2 cursor-pointer"
                             onClick={(e) => {

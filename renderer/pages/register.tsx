@@ -8,8 +8,9 @@ import { RiPencilFill } from 'react-icons/ri';
 type Inputs = {
     english: string;
     japanese: string;
-    pos: (keyof PoSs)[];
+    annotation: string;
     folder: string;
+    pos: (keyof PoSs)[];
 };
 
 type PoSs = {
@@ -108,28 +109,37 @@ const Register: React.FC = () => {
                 >
                     <div className="m-1 w-5/6 flex justify-between">
                         <label className="w-20 text-center">
-                            <span className="font-bold text-lg">英単語:</span>
+                            <span className="font-bold text-lg select-none">英単語:</span>
                         </label>
                         <input
                             {...register('english', { required: true })}
-                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold"
+                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold placeholder:select-none"
                             placeholder={errors.english?.type === 'required' ? '英単語は必須です' : ''}
                         />
                     </div>
                     <div className="m-1 w-5/6 flex justify-between">
                         <label className="w-20 text-center">
-                            <span className="font-bold text-lg">訳:</span>
+                            <span className="font-bold text-lg select-none">訳:</span>
                         </label>
                         <textarea
                             {...register('japanese', { required: true })}
-                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 resize-none text-center text-xl font-bold"
+                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 resize-none text-center text-xl font-bold placeholder:select-none"
                             rows={rows <= 10 ? rows : 10}
                             placeholder={errors.japanese?.type === 'required' ? '訳は必須です' : ''}
                         ></textarea>
                     </div>
+                    <div className="m-1 w-5/6 flex justify-between">
+                        <label className="w-20 text-center">
+                            <span className="font-bold text-lg select-none">注釈:</span>
+                        </label>
+                        <input
+                            {...register('annotation')}
+                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold"
+                        />
+                    </div>
                     <div className="m-1 w-5/6 flex justify-between items-center">
                         <label className="w-20 text-center">
-                            <span className="font-bold text-lg">フォルダ:</span>
+                            <span className="font-bold text-lg select-none">フォルダ:</span>
                         </label>
                         <Controller
                             control={control}
@@ -171,6 +181,7 @@ const Register: React.FC = () => {
                                                         textAlign: 'center',
                                                         fontSize: '1.2rem',
                                                         fontWeight: 700,
+                                                        userSelect: 'none',
                                                     };
                                                 },
                                             }}
@@ -192,7 +203,7 @@ const Register: React.FC = () => {
                                         value={key}
                                         {...register('pos')}
                                     />
-                                    <span className="m-1 text-2xl">{PoSs[key]}</span>
+                                    <span className="m-1 text-2xl select-none">{PoSs[key]}</span>
                                 </label>
                             );
                         })}
@@ -202,7 +213,7 @@ const Register: React.FC = () => {
                         className="flex items-center cursor-pointer border-b-2 border-solid border-gray-500"
                     >
                         <RiPencilFill size={'2em'} />
-                        <span className=" text-2xl">登録</span>
+                        <span className="text-2xl select-none">登録</span>
                     </div>
                     {/* <input type="submit" value="登録" /> */}
                 </form>

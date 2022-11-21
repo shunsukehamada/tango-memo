@@ -25,17 +25,16 @@ const List = ({ items }: Props) => {
 
     const reorder = (items: Word[], startIndex: number, endIndex: number) => {
         const [removed] = items.splice(startIndex, 1);
-        console.log(removed);
         items.splice(endIndex, 0, removed);
     };
 
-    const onDragEnd = (result: DropResult) => {
-        const { source, destination } = result;
-        if (!destination) {
-            return;
-        }
-        reorder(items, source.index, destination.index);
-    };
+    // const onDragEnd = (result: DropResult) => {
+    //     const { source, destination } = result;
+    //     if (!destination) {
+    //         return;
+    //     }
+    //     reorder(items, source.index, destination.index);
+    // };
 
     return (
         <div className="flex h-full">
@@ -71,6 +70,7 @@ const List = ({ items }: Props) => {
                         <div className="overflow-y-scroll scrollbar-hide" style={{ height: '90%' }}>
                             <DragDropContext
                                 onDragEnd={(result) => {
+                                    console.log(result)
                                     const { source, destination } = result;
                                     if (!destination) {
                                         return;

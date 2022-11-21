@@ -50,7 +50,9 @@ app.on('window-all-closed', app.quit);
 // listen the channel `message` and resend the received message to the renderer process
 ipcMain.handle('sample', async () => {
     const db = new sqlite3.Database(
-        isDev ? path.join(__dirname, 'db', 'sample.db') : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
 
     const words: { id: number; english: string; japanese: string }[] = await new Promise<
@@ -70,7 +72,9 @@ ipcMain.handle('sample', async () => {
 
 ipcMain.handle('get-all-folders', async () => {
     const db = new sqlite3.Database(
-        isDev ? path.join(__dirname, 'db', 'sample.db') : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
     const parentFolders: { id: number; name: string }[] = await new Promise((resolve, reject) => {
         db.all('select * from parent_folders', (err, rows) => {
@@ -105,7 +109,9 @@ ipcMain.handle('get-all-folders', async () => {
 
 ipcMain.handle('get-words', async (_e, parentFolder: string, folder: string): Promise<Word[]> => {
     const db = new sqlite3.Database(
-        isDev ? path.join(__dirname, 'db', 'sample.db') : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
     const parentId: number = await new Promise<number>((resolve, reject) => {
         db.get(

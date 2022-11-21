@@ -19,7 +19,6 @@ const Layout = () => {
 
     const getWords = async (parentFolder: string, folder: string): Promise<void> => {
         const words: Word[] = await global.ipcRenderer.invoke('get-words', parentFolder, folder);
-        console.log(words)
         setWords(words);
     };
 
