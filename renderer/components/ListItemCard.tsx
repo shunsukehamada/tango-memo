@@ -13,6 +13,9 @@ const ListItemCard = ({ word, isHidden, index }: Props) => {
         <div
             className="border-2 border-solid border-gray-400 m-2 w-60 rounded-lg max-h-32 group"
             style={{ minWidth: '200px' }}
+            onClick={() => {
+                alert(`${word.english} ${word.japanese}${word.annotation ? '\n' + word.annotation : ''}`);
+            }}
         >
             <div className="text-center">
                 <span className="text-xl font-bold border-b-2 border-solid border-gray-400 px-3">{word.english}</span>

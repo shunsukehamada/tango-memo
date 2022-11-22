@@ -15,6 +15,8 @@ export type Word = {
     id: number;
     english: string;
     japanese: string;
+    annotation: string;
+    folder_id: string;
 };
 
 type View = 'list' | 'grid';
@@ -70,7 +72,7 @@ const List = ({ items }: Props) => {
                         <div className="overflow-y-scroll scrollbar-hide" style={{ height: '90%' }}>
                             <DragDropContext
                                 onDragEnd={(result) => {
-                                    console.log(result)
+                                    console.log(result);
                                     const { source, destination } = result;
                                     if (!destination) {
                                         return;

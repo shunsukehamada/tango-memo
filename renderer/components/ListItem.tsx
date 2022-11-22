@@ -27,11 +27,27 @@ const ListItem = ({ word, isHidden, index }: Props) => {
                                 />
                             </div>
 
-                            <div className="border-b-4 border-solid border-gray-400  text-center mx-10">
+                            <div
+                                className="border-b-4 border-solid border-gray-400  text-center mx-10 cursor-pointer"
+                                onClick={() => {
+                                    alert(
+                                        `${word.english} ${word.japanese}${
+                                            word.annotation ? '\n' + word.annotation : ''
+                                        }`
+                                    );
+                                }}
+                            >
                                 <span className="text-lg font-bold">{word.english}</span>
                             </div>
                         </div>
-                        <div className="border-b-4 border-solid border-gray-400 w-1/2 text-center mx-10 cursor-pointer group">
+                        <div
+                            className="border-b-4 border-solid border-gray-400 w-1/2 text-center ml-10 mr-2 cursor-pointer group"
+                            onClick={() => {
+                                alert(
+                                    `${word.english} ${word.japanese}${word.annotation ? '\n' + word.annotation : ''}`
+                                );
+                            }}
+                        >
                             <span className={`text-lg font-bold ${isHidden && 'opacity-0'} group-hover:opacity-100`}>
                                 {word.japanese}
                             </span>
