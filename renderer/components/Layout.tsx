@@ -2,11 +2,11 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import SideBar, { DirectoryStructure } from './SideBar';
 import List, { Word } from './List';
 
-
 const Layout = () => {
     // build時は削除
     const [winReady, setWinReady] = useState(false);
     const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
+    const [openedFolder, setOpenedFolder] = useState<{ parent: string; folder: string } | null>(null);
     const [words, setWords] = useState<Word[]>([]);
     useEffect(() => {
         setWinReady(true);
@@ -29,9 +29,13 @@ const Layout = () => {
                     directoryStructure={directoryStructureState}
                     setDirectoryStructure={setDirectoryStructureState}
                     getWords={getWords}
+                    setOpenedFolder={setOpenedFolder}
                 />
             </div>
-            <div className="flex-1">{winReady && <List items={words} setWords={setWords}/>}</div>
+
+            <div className="flex-1">
+                {winReady && <List items={words} setWords={setWords} openedFolder={openedFolder} />}
+            </div>
             {/* <div className="flex-1">
                 <List items={words} />
             </div> */}

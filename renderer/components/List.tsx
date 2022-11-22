@@ -13,6 +13,10 @@ import { VscEdit, VscTrash } from 'react-icons/vsc';
 type Props = {
     items: Word[];
     setWords: React.Dispatch<React.SetStateAction<Word[]>>;
+    openedFolder: {
+        parent: string;
+        folder: string;
+    };
 };
 
 export type Word = {
@@ -25,7 +29,7 @@ export type Word = {
 
 type View = 'list' | 'grid';
 
-const List = ({ items, setWords }: Props) => {
+const List = ({ items, setWords, openedFolder }: Props) => {
     const [isHidden, setIsHidden] = useState(false);
     const [view, setView] = useState<View>('list');
 
@@ -77,6 +81,11 @@ const List = ({ items, setWords }: Props) => {
     return (
         <div className="flex h-full">
             <div className="flex-1">
+                {openedFolder && (
+                    <div className="text-lg font-bold mt-1">
+                        {openedFolder.parent}&gt;{openedFolder.folder}
+                    </div>
+                )}
                 {view === 'list' ? (
                     <div className="flex flex-col h-screen">
                         <div className="flex justify-evenly">

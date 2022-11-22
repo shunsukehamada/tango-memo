@@ -12,9 +12,15 @@ type Props = {
     directoryStructure: DirectoryStructure[];
     setDirectoryStructure: React.Dispatch<React.SetStateAction<DirectoryStructure[]>>;
     getWords: (parentFolder: string, folder: string) => Promise<void>;
+    setOpenedFolder: React.Dispatch<
+        React.SetStateAction<{
+            parent: string;
+            folder: string;
+        }>
+    >;
 };
 
-const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords }: Props) => {
+const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords, setOpenedFolder }: Props) => {
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     const [isOpenStates, setIsOpenStates] = useState<boolean[]>([]);
     const [isSelectedStates, setIsSelectedStates] = useState<boolean[]>([]);
@@ -175,6 +181,10 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                                                 className="ml-4 my-1 flex before:content-['>']"
                                                                 onClick={() => {
                                                                     getWords(directory.parent, child);
+                                                                    setOpenedFolder({
+                                                                        parent: directory.parent,
+                                                                        folder: child,
+                                                                    });
                                                                 }}
                                                             >
                                                                 <li className="ml-1  cursor-pointer">
