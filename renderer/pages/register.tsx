@@ -77,11 +77,14 @@ const Register: React.FC = () => {
         control,
         formState: { errors },
         reset,
+        setValue,
     } = useForm<Inputs>({ mode: 'all', defaultValues: { japanese: '', pos: [] } });
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         global.ipcRenderer.send('register-new-word', data);
+        const folder = data.folder;
         reset();
+        setValue('folder', folder);
     };
 
     const PoSs: PoSs = {
@@ -197,6 +200,7 @@ const Register: React.FC = () => {
                                                     };
                                                 },
                                             }}
+                                            value={watch('folder')}
                                             onChange={field.onChange}
                                         />
                                     </>
