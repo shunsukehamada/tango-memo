@@ -6,9 +6,13 @@ import { HiOutlineViewList } from 'react-icons/hi';
 import { MdOutlineGridView, MdReorder } from 'react-icons/md';
 import ListItemCard from './ListItemCard';
 import { DragDropContext, Draggable, Droppable, DropResult, resetServerContext } from 'react-beautiful-dnd';
+import { Item, ItemParams, Menu, useContextMenu } from 'react-contexify';
+import 'react-contexify/ReactContexify.css';
+import { VscEdit, VscTrash } from 'react-icons/vsc';
 
 type Props = {
     items: Word[];
+    setWords: React.Dispatch<React.SetStateAction<Word[]>>;
 };
 
 export type Word = {
@@ -21,7 +25,7 @@ export type Word = {
 
 type View = 'list' | 'grid';
 
-const List = ({ items }: Props) => {
+const List = ({ items, setWords }: Props) => {
     const [isHidden, setIsHidden] = useState(false);
     const [view, setView] = useState<View>('list');
 
@@ -37,6 +41,38 @@ const List = ({ items }: Props) => {
     //     }
     //     reorder(items, source.index, destination.index);
     // };
+
+    const MENU_ID = 'context';
+    const { show } = useContextMenu({
+        id: MENU_ID,
+    });
+
+    const handleContextMenu = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, word: Word) => {
+        show({
+            event,
+            props: {
+                word: word,
+            },
+        });
+    };
+
+    const handleItemClick = ({ id, props }: ItemParams<{ word: Word }>) => {
+        if (id === 'delete') {
+            if (confirm(`${props.word.english}を削除しますか?`)) {
+                global.ipcRenderer.send('delete-word', props.word.id);
+            }
+            setWords(
+                [...items].filter((word) => {
+                    return word.id !== props.word.id;
+                })
+            );
+            return;
+        }
+        if (id === 'edit') {
+            console.log('edit');
+            return;
+        }
+    };
 
     return (
         <div className="flex h-full">
@@ -72,7 +108,6 @@ const List = ({ items }: Props) => {
                         <div className="overflow-y-scroll scrollbar-hide" style={{ height: '90%' }}>
                             <DragDropContext
                                 onDragEnd={(result) => {
-                                    console.log(result);
                                     const { source, destination } = result;
                                     if (!destination) {
                                         return;
@@ -87,7 +122,12 @@ const List = ({ items }: Props) => {
                                                 <ul>
                                                     {items.map((item, index) => (
                                                         <li key={item.id}>
-                                                            <ListItem word={item} isHidden={isHidden} index={index} />
+                                                            <ListItem
+                                                                word={item}
+                                                                isHidden={isHidden}
+                                                                index={index}
+                                                                handleContextMenu={handleContextMenu}
+                                                            />
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -144,6 +184,16 @@ const List = ({ items }: Props) => {
                     }}
                 />
             </div>
+            <Menu id={MENU_ID}>
+                <Item id="delete" onClick={handleItemClick}>
+                    <VscTrash />
+                    削除
+                </Item>
+                <Item id="edit" onClick={handleItemClick}>
+                    <VscEdit />
+                    編集
+                </Item>
+            </Menu>
         </div>
     );
 };

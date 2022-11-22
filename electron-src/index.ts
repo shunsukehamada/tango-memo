@@ -7,6 +7,7 @@ import { BrowserWindow, app, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
 import prepareNext from 'electron-next';
 import sqlite3 from 'sqlite3';
+import { IpcMainEvent } from 'electron/main';
 
 type DirectoryStructure = {
     parent: string;
@@ -260,6 +261,24 @@ ipcMain.on('create-new-folder', async (_e, parentFolder: string, folder: string)
         );
     });
     db.run('insert into folders(name, parent_id) values(?, ?)', [folder, parentId], (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+});
+
+ipcMain.on('delete-word', async (_e: IpcMainEvent, id: number) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    db.run('delete from words where id = ?', id, (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+    db.run('delete from words_poss where words_id = ?', id, (err) => {
         if (err) {
             console.error(err);
         }

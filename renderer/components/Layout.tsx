@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import SideBar, { DirectoryStructure } from './SideBar';
 import List, { Word } from './List';
-import { resetServerContext } from 'react-beautiful-dnd';
+
 
 const Layout = () => {
     // build時は削除
@@ -31,7 +31,7 @@ const Layout = () => {
                     getWords={getWords}
                 />
             </div>
-            <div className="flex-1">{winReady && <List items={words} />}</div>
+            <div className="flex-1">{winReady && <List items={words} setWords={setWords}/>}</div>
             {/* <div className="flex-1">
                 <List items={words} />
             </div> */}

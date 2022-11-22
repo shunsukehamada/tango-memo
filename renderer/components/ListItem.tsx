@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Word } from './List';
 import { MdOutlineDragHandle } from 'react-icons/md';
 import { Draggable } from 'react-beautiful-dnd';
@@ -7,9 +7,10 @@ type Props = {
     word: Word;
     isHidden: boolean;
     index: number;
+    handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, word: Word) => void;
 };
 
-const ListItem = ({ word, isHidden, index }: Props) => {
+const ListItem = ({ word, isHidden, index, handleContextMenu }: Props) => {
     return (
         <Draggable draggableId={String(word.id)} index={index}>
             {(provided, snapshot) => {
@@ -18,6 +19,9 @@ const ListItem = ({ word, isHidden, index }: Props) => {
                         className="flex justify-evenly m-2 items-end"
                         ref={provided.innerRef}
                         {...provided.draggableProps}
+                        onContextMenu={(e) => {
+                            handleContextMenu(e, word);
+                        }}
                     >
                         <div className="w-1/2 relative">
                             <div {...provided.dragHandleProps} className="w-10">
