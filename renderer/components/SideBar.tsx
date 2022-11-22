@@ -16,9 +16,8 @@ type Props = {
 
 const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords }: Props) => {
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
-    // const [directoryStructure, setDirectoryStructure] = useState<DirectoryStructure[]>(directoryStructure);
-    const [isOpenStates, setIsOpenStates] = useState<boolean[]>(Array(directoryStructure.length).fill(false));
-    const [isSelectedStates, setIsSelectedStates] = useState<boolean[]>(Array(directoryStructure.length).fill(false));
+    const [isOpenStates, setIsOpenStates] = useState<boolean[]>([]);
+    const [isSelectedStates, setIsSelectedStates] = useState<boolean[]>([]);
     const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
@@ -43,6 +42,11 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
         },
         [isResizing]
     );
+
+    useEffect(() => {
+        setIsOpenStates(Array(directoryStructure.length).fill(false));
+        setIsSelectedStates(Array(directoryStructure.length).fill(false));
+    }, [directoryStructure]);
 
     useEffect(() => {
         window.addEventListener('mousemove', resize);
@@ -145,7 +149,11 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                                                     setDirectoryStructure(newStates);
                                                                     setNewFolderNameInputValue('');
                                                                     setIsCreatingNewFolder(false);
-                                                                    global.ipcRenderer.send("create-new-folder",newStates[index].parent ,newFolderNameInputValue)
+                                                                    global.ipcRenderer.send(
+                                                                        'create-new-folder',
+                                                                        newStates[index].parent,
+                                                                        newFolderNameInputValue
+                                                                    );
                                                                 }}
                                                             >
                                                                 <input
