@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, AnimationProps, BoundingBox, motion } from 'framer-motion';
+import { AnimatePresence, AnimationProps, motion } from 'framer-motion';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import Select, { GroupProps, OptionsOrGroups } from 'react-select';
+import Select from 'react-select';
 import { RiPencilFill } from 'react-icons/ri';
 import { DirectoryStructure } from '../components/SideBar';
 type Inputs = {

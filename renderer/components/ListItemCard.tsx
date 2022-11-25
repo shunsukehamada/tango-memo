@@ -1,20 +1,22 @@
 import React from 'react';
-import { Draggable } from 'react-beautiful-dnd';
 import { Word } from './List';
 
 type Props = {
     word: Word;
     isHidden: boolean;
-    index: number;
+    handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, word: Word) => void;
 };
 
-const ListItemCard = ({ word, isHidden, index }: Props) => {
+const ListItemCard = ({ word, isHidden, handleContextMenu }: Props) => {
     return (
         <div
             className="border-2 border-solid border-gray-400 m-2 w-60 rounded-lg max-h-32 group"
             style={{ minWidth: '200px' }}
             onClick={() => {
                 alert(`${word.english} ${word.japanese}${word.annotation ? '\n' + word.annotation : ''}`);
+            }}
+            onContextMenu={(e) => {
+                handleContextMenu(e, word);
             }}
         >
             <div className="text-center">

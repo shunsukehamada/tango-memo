@@ -67,12 +67,12 @@ const List = ({ items, setWords, openedFolder, editItems }: Props) => {
         if (id === 'delete') {
             if (confirm(`${props.word.english}を削除しますか?`)) {
                 global.ipcRenderer.send('delete-word', props.word.id);
+                setWords(
+                    [...items].filter((word) => {
+                        return word.id !== props.word.id;
+                    })
+                );
             }
-            setWords(
-                [...items].filter((word) => {
-                    return word.id !== props.word.id;
-                })
-            );
             return;
         }
         if (id === 'edit') {
@@ -187,7 +187,11 @@ const List = ({ items, setWords, openedFolder, editItems }: Props) => {
                             >
                                 {items.map((item, index) => (
                                     <div key={item.id}>
-                                        <ListItemCard word={item} isHidden={isHidden} index={index} />
+                                        <ListItemCard
+                                            word={item}
+                                            isHidden={isHidden}
+                                            handleContextMenu={handleContextMenu}
+                                        />
                                     </div>
                                 ))}
                             </div>
