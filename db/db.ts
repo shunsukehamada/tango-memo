@@ -5,14 +5,14 @@ const toeflDb = new sqlite3.Database('./toefl.db');
 toeflDb.serialize(() => {
     toeflDb.all('select * from word limit 150', (err: Error | null, rows: { english: string; japanese: string }[]) => {
         if (err) {
-            console.log(err);
+            console.error(err);
         }
         sampleDb.serialize(() => {
             sampleDb.get(
                 'select id from folders where name = "folder1-1"',
                 (err: Error | null, folderId: { id: number }) => {
                     if (err) {
-                        console.log(err);
+                        console.error(err);
                     }
                     rows.forEach((row, index) => {
                         if (index >= 50) {
@@ -25,7 +25,7 @@ toeflDb.serialize(() => {
                             folderId.id,
                             (err: Error | null) => {
                                 if (err) {
-                                    console.log(err);
+                                    console.error(err);
                                 }
                             }
                         );
@@ -36,7 +36,7 @@ toeflDb.serialize(() => {
                 'select id from folders where name = "folder1-2"',
                 (err: Error | null, folderId: { id: number }) => {
                     if (err) {
-                        console.log(err);
+                        console.error(err);
                     }
                     rows.forEach((row, index) => {
                         if (index < 50 || index >= 100) {
@@ -49,7 +49,7 @@ toeflDb.serialize(() => {
                             folderId.id,
                             (err: Error | null) => {
                                 if (err) {
-                                    console.log(err);
+                                    console.error(err);
                                 }
                             }
                         );
@@ -60,7 +60,7 @@ toeflDb.serialize(() => {
                 'select id from folders where name = "folder2-1"',
                 (err: Error | null, folderId: { id: number }) => {
                     if (err) {
-                        console.log(err);
+                        console.error(err);
                     }
                     rows.forEach((row, index) => {
                         if (index < 100) {
@@ -73,7 +73,7 @@ toeflDb.serialize(() => {
                             folderId.id,
                             (err: Error | null) => {
                                 if (err) {
-                                    console.log(err);
+                                    console.error(err);
                                 }
                             }
                         );

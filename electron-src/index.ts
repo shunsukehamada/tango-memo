@@ -7,7 +7,7 @@ import { BrowserWindow, app, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
 import prepareNext from 'electron-next';
 import sqlite3 from 'sqlite3';
-import { IpcMainEvent } from 'electron/main';
+import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
 
 type DirectoryStructure = {
     parent: string;
@@ -35,11 +35,13 @@ type Inputs = {
     english: string;
     japanese: string;
     annotation: string;
-    folder: {
-        label: string;
-        value: { parent: string; child: string };
-    };
+    folder: Folder;
     pos: (keyof PoSs)[];
+};
+
+type Folder = {
+    label: string;
+    value: { parent: string; child: string };
 };
 
 // Prepare the renderer once the app is ready
@@ -283,4 +285,111 @@ ipcMain.on('delete-word', async (_e: IpcMainEvent, id: number) => {
             console.error(err);
         }
     });
+});
+
+ipcMain.on(
+    'edit-word',
+    async (_e: IpcMainEvent, { english, japanese, annotation, folder, pos }: Inputs, id: number) => {
+        const db = new sqlite3.Database(
+            isDev
+                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+        );
+        const editWord = async () => {
+            const parentId: number = await new Promise<number>((resolve, reject) => {
+                db.get(
+                    'select id from parent_folders where name = ?',
+                    folder.value.parent,
+                    (err: Error | null, row: { id: number }) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve(row.id);
+                    }
+                );
+            });
+            const folderId: number = await new Promise<number>((resolve, reject) => {
+                db.get(
+                    'select id from folders where parent_id = ? and name = ?',
+                    parentId,
+                    folder.label,
+                    (err: Error | null, row: { id: number }) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve(row.id);
+                    }
+                );
+            });
+            db.run(
+                'update words set english = ?, japanese = ?, annotation = ?, folder_id = ? where id = ?',
+                [english, japanese, annotation, folderId, id],
+                (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                }
+            );
+        };
+
+        const editWordsPossRelation = async () => {
+            await new Promise<void>((resolve, reject) => {
+                db.run('delete from words_poss where words_id = ?', id, (err) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve();
+                });
+            });
+            for (const posName of pos) {
+                const posId: number = await new Promise<number>((resolve, reject) => {
+                    db.get('select id from poss where pos = ?', posName, (err: Error | null, row: { id: number }) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve(row.id);
+                    });
+                });
+                db.run('insert into words_poss(words_id, poss_id) values(?, ?)', [id, posId], (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                });
+            }
+        };
+        editWord();
+        editWordsPossRelation();
+    }
+);
+
+ipcMain.handle('get-folder', async (_e: IpcMainInvokeEvent, id: number): Promise<Folder> => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const [folderName, parentId] = await new Promise<[string, number]>((resolve, reject) => {
+        db.get(
+            'select name, parent_id from folders where id = ?',
+            id,
+            (err: Error | null, row: { name: string; parent_id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve([row.name, row.parent_id]);
+            }
+        );
+    });
+    const parentName = await new Promise<string>((resolve, reject) => {
+        db.get('select name from parent_folders where id = ?', parentId, (err: Error | null, row: { name: string }) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row.name);
+        });
+    });
+    return {
+        label: folderName,
+        value: { parent: parentName, child: folderName },
+    };
 });

@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SideBar, { DirectoryStructure } from './SideBar';
 import List, { Word } from './List';
 
@@ -22,6 +22,16 @@ const Layout = () => {
         setWords(words);
     };
 
+    const editListItem = (word: Word) => {
+        const editedWords = [...words].map((originalWord) => {
+            if (originalWord.id === word.id) {
+                return word;
+            }
+            return originalWord;
+        });
+        setWords(editedWords);
+    };
+
     return (
         <div className="flex overflow-y-hidden">
             <div className="h-screen flex items-center">
@@ -34,7 +44,9 @@ const Layout = () => {
             </div>
 
             <div className="flex-1">
-                {winReady && <List items={words} setWords={setWords} openedFolder={openedFolder} />}
+                {winReady && (
+                    <List items={words} setWords={setWords} openedFolder={openedFolder} editItems={editListItem} />
+                )}
             </div>
             {/* <div className="flex-1">
                 <List items={words} />
