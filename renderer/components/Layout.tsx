@@ -22,7 +22,17 @@ const Layout = () => {
         setWords(words);
     };
 
-    const editListItem = (word: Word) => {
+    const editListItem = (word: Word, deleted: boolean = false) => {
+        if (deleted) {
+            const editedWords = [...words].filter((originalWord) => {
+                if (originalWord.id === word.id) {
+                    return false;
+                }
+                return true;
+            });
+            setWords(editedWords);
+            return;
+        }
         const editedWords = [...words].map((originalWord) => {
             if (originalWord.id === word.id) {
                 return word;

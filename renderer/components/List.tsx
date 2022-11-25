@@ -17,7 +17,7 @@ type Props = {
         parent: string;
         folder: string;
     };
-    editItems: (word: Word) => void;
+    editItems: (word: Word, deleted?: boolean) => void;
 };
 
 export type Word = {

@@ -6,7 +6,7 @@ type Props = {
     word: Word;
     isShow: boolean;
     close: () => void;
-    editItems: (word: Word) => void;
+    editItems: (word: Word, deleted?: boolean) => void;
 };
 const EditionModal: React.FC<Props> = ({ word, isShow, close, editItems }) => {
     return (

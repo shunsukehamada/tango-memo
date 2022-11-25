@@ -32,7 +32,7 @@ type PoSs = {
 type Props = {
     word: Word;
     close: () => void;
-    editItems: (word: Word) => void;
+    editItems: (word: Word, deleted?: boolean) => void;
 };
 
 const RegisterForm: React.FC<Props> = ({ word, close, editItems }) => {
@@ -71,6 +71,8 @@ const RegisterForm: React.FC<Props> = ({ word, close, editItems }) => {
             defaultFolder.value.child === data.folder.value.child
         ) {
             editItems({ ...word, english: data.english, japanese: data.japanese, annotation: data.annotation });
+        } else {
+            editItems(word, true);
         }
         close();
     };
