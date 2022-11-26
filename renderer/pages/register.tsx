@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, AnimationProps, motion } from 'framer-motion';
+import {
+    AnimatePresence,
+    motion,
+    useAnimationControls,
+} from 'framer-motion';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import { RiPencilFill } from 'react-icons/ri';
@@ -32,10 +36,11 @@ const Register: React.FC = () => {
     const router = useRouter();
     const [isTransitioned, setIsTransitioned] = useState(false);
     const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
+    const animationControl = useAnimationControls();
 
     if (typeof document !== 'undefined') {
         document.addEventListener('wheel', (e) => {
-            if (!isTransitioned && e.deltaX <= -40) {
+            if (e.deltaX <= -40) {
                 setIsTransitioned(true);
             }
         });
@@ -45,30 +50,23 @@ const Register: React.FC = () => {
             const allFolders = (await global.ipcRenderer.invoke('get-all-folders')) as DirectoryStructure[];
             setDirectoryStructureState(allFolders);
         };
+        animationControl.start({ x: ['10%', '0%'], opacity: [0, 1], transition: { duration: 0.25 } });
         getAllFolders();
     }, []);
-    const slideInAnimationConfig: AnimationProps = {
-        animate: isTransitioned
-            ? { transition: { duration: 0 }, x: '0%' }
-            : {
-                  x: '0%',
-                  opacity: 1,
-              },
-        initial: {
-            x: '30%',
-            opacity: 0,
-        },
-        exit: {
-            x: '30%',
-            opacity: 0,
-            transition: {
-                duration: 0.25,
-            },
-        },
-        transition: {
-            duration: 0.25,
-        },
-    };
+
+    useEffect(() => {
+        const transition = async () => {
+            if (isTransitioned) {
+                await animationControl.start({
+                    x: '50%',
+                    opacity: [1, 1, 0.25, 0],
+                    transition: { duration: 0.25 },
+                });
+                router.push('/');
+            }
+        };
+        transition();
+    }, [isTransitioned]);
 
     const {
         register,
@@ -116,134 +114,127 @@ const Register: React.FC = () => {
     const formRef = useRef();
     return (
         <>
-            <div className="h-screen w-screen overflow-hidden flex justify-center items-center">
-                <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="h-3/4 w-3/4 flex items-center flex-col justify-around"
-                    ref={formRef}
-                >
-                    <div className="m-1 w-5/6 flex justify-between">
-                        <label className="w-20 text-center">
-                            <span className="font-bold text-lg select-none">英単語:</span>
-                        </label>
-                        <input
-                            {...register('english', { required: true })}
-                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold placeholder:select-none"
-                            placeholder={errors.english?.type === 'required' ? '英単語は必須です' : ''}
-                        />
-                    </div>
-                    <div className="m-1 w-5/6 flex justify-between">
-                        <label className="w-20 text-center">
-                            <span className="font-bold text-lg select-none">訳:</span>
-                        </label>
-                        <textarea
-                            {...register('japanese', { required: true })}
-                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 resize-none text-center text-xl font-bold placeholder:select-none"
-                            rows={rows <= 10 ? rows : 10}
-                            placeholder={errors.japanese?.type === 'required' ? '訳は必須です' : ''}
-                        ></textarea>
-                    </div>
-                    <div className="m-1 w-5/6 flex justify-between">
-                        <label className="w-20 text-center">
-                            <span className="font-bold text-lg select-none">注釈:</span>
-                        </label>
-                        <input
-                            {...register('annotation')}
-                            className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold"
-                        />
-                    </div>
-                    <div className="m-1 w-5/6 flex justify-between items-center">
-                        <label className="w-20 text-center">
-                            <span className="font-bold text-lg select-none">フォルダ:</span>
-                        </label>
-                        <Controller
-                            control={control}
-                            name="folder"
-                            rules={{ required: true }}
-                            render={({ field }) => {
-                                return (
-                                    <>
-                                        <Select
-                                            options={options}
-                                            instanceId="folder-select"
-                                            className="flex-1"
-                                            styles={{
-                                                control: (baseStyles) => {
-                                                    return {
-                                                        ...baseStyles,
-                                                        borderWidth: 0,
-                                                        borderBottomWidth: '2px',
-                                                        borderStyle: 'solid',
-                                                        borderColor: 'rgb(209 213 219)',
-                                                        borderRadius: 0,
-                                                        boxShadow: 'none',
-                                                        ':focus': { outlineColor: 'red' },
-                                                    };
-                                                },
-                                                group: (baseStyles) => {
-                                                    return {
-                                                        ...baseStyles,
-                                                        // fontWeight: 200,
-                                                        fontSize: '1.1rem',
-                                                    };
-                                                },
-                                                groupHeading: (baseStyles) => {
-                                                    return { ...baseStyles, fontWeight: 700 };
-                                                },
-                                                valueContainer: (baseStyles) => {
-                                                    return {
-                                                        ...baseStyles,
-                                                        textAlign: 'center',
-                                                        fontSize: '1.2rem',
-                                                        fontWeight: 700,
-                                                        userSelect: 'none',
-                                                    };
-                                                },
-                                            }}
-                                            value={watch('folder')}
-                                            onChange={field.onChange}
-                                        />
-                                    </>
-                                );
-                            }}
-                        />
-                    </div>
-                    <div>
-                        {Object.keys(PoSs).map((key) => {
-                            return (
-                                <label className="m-2" key={key}>
-                                    <input
-                                        type="checkbox"
-                                        className="scale-125"
-                                        name="PoS"
-                                        value={key}
-                                        {...register('pos')}
-                                    />
-                                    <span className="m-1 text-2xl select-none">{PoSs[key]}</span>
-                                </label>
-                            );
-                        })}
-                    </div>
-                    <div
-                        onClick={handleSubmit(onSubmit)}
-                        className="flex items-center cursor-pointer border-b-2 border-solid border-gray-500"
-                    >
-                        <RiPencilFill size={'2em'} />
-                        <span className="text-2xl select-none">登録</span>
-                    </div>
-                    {/* <input type="submit" value="登録" /> */}
-                </form>
-            </div>
             <AnimatePresence mode="wait">
-                <motion.div
-                    {...slideInAnimationConfig}
-                    key={Math.random()}
-                    onAnimationComplete={(e) => {
-                        if (isTransitioned) {
-                            router.push('/');
-                        }
-                    }}
-                ></motion.div>
+                <motion.div animate={animationControl}>
+                    <div className="h-screen w-screen overflow-hidden flex justify-center items-center">
+                        <form
+                            onSubmit={handleSubmit(onSubmit)}
+                            className="h-3/4 w-3/4 flex items-center flex-col justify-around"
+                            ref={formRef}
+                        >
+                            <div className="m-1 w-5/6 flex justify-between">
+                                <label className="w-20 text-center">
+                                    <span className="font-bold text-lg select-none">英単語:</span>
+                                </label>
+                                <input
+                                    {...register('english', { required: true })}
+                                    className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold placeholder:select-none"
+                                    placeholder={errors.english?.type === 'required' ? '英単語は必須です' : ''}
+                                />
+                            </div>
+                            <div className="m-1 w-5/6 flex justify-between">
+                                <label className="w-20 text-center">
+                                    <span className="font-bold text-lg select-none">訳:</span>
+                                </label>
+                                <textarea
+                                    {...register('japanese', { required: true })}
+                                    className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 resize-none text-center text-xl font-bold placeholder:select-none"
+                                    rows={rows <= 10 ? rows : 10}
+                                    placeholder={errors.japanese?.type === 'required' ? '訳は必須です' : ''}
+                                ></textarea>
+                            </div>
+                            <div className="m-1 w-5/6 flex justify-between">
+                                <label className="w-20 text-center">
+                                    <span className="font-bold text-lg select-none">注釈:</span>
+                                </label>
+                                <input
+                                    {...register('annotation')}
+                                    className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold"
+                                />
+                            </div>
+                            <div className="m-1 w-5/6 flex justify-between items-center">
+                                <label className="w-20 text-center">
+                                    <span className="font-bold text-lg select-none">フォルダ:</span>
+                                </label>
+                                <Controller
+                                    control={control}
+                                    name="folder"
+                                    rules={{ required: true }}
+                                    render={({ field }) => {
+                                        return (
+                                            <>
+                                                <Select
+                                                    options={options}
+                                                    instanceId="folder-select"
+                                                    className="flex-1"
+                                                    styles={{
+                                                        control: (baseStyles) => {
+                                                            return {
+                                                                ...baseStyles,
+                                                                borderWidth: 0,
+                                                                borderBottomWidth: '2px',
+                                                                borderStyle: 'solid',
+                                                                borderColor: 'rgb(209 213 219)',
+                                                                borderRadius: 0,
+                                                                boxShadow: 'none',
+                                                                ':focus': { outlineColor: 'red' },
+                                                            };
+                                                        },
+                                                        group: (baseStyles) => {
+                                                            return {
+                                                                ...baseStyles,
+                                                                // fontWeight: 200,
+                                                                fontSize: '1.1rem',
+                                                            };
+                                                        },
+                                                        groupHeading: (baseStyles) => {
+                                                            return { ...baseStyles, fontWeight: 700 };
+                                                        },
+                                                        valueContainer: (baseStyles) => {
+                                                            return {
+                                                                ...baseStyles,
+                                                                textAlign: 'center',
+                                                                fontSize: '1.2rem',
+                                                                fontWeight: 700,
+                                                                userSelect: 'none',
+                                                            };
+                                                        },
+                                                    }}
+                                                    value={watch('folder')}
+                                                    onChange={field.onChange}
+                                                />
+                                            </>
+                                        );
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                {Object.keys(PoSs).map((key) => {
+                                    return (
+                                        <label className="m-2" key={key}>
+                                            <input
+                                                type="checkbox"
+                                                className="scale-125"
+                                                name="PoS"
+                                                value={key}
+                                                {...register('pos')}
+                                            />
+                                            <span className="m-1 text-2xl select-none">{PoSs[key]}</span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                            <div
+                                onClick={handleSubmit(onSubmit)}
+                                className="flex items-center cursor-pointer border-b-2 border-solid border-gray-500"
+                            >
+                                <RiPencilFill size={'2em'} />
+                                <span className="text-2xl select-none">登録</span>
+                            </div>
+                            {/* <input type="submit" value="登録" /> */}
+                        </form>
+                    </div>
+                </motion.div>
             </AnimatePresence>
         </>
     );
