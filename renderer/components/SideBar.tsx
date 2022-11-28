@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { MdCreateNewFolder, MdOutlineCreateNewFolder } from 'react-icons/md';
 import { VscCollapseAll, VscNewFolder } from 'react-icons/vsc';
 import Collapse from './Collapse';
 
@@ -20,10 +19,13 @@ type Props = {
     >;
 };
 
+type isSelectedType = {
+    [parent: DirectoryStructure['parent']]: { parent: boolean; children: boolean[] };
+};
 const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords, setOpenedFolder }: Props) => {
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     const [isOpenStates, setIsOpenStates] = useState<boolean[]>([]);
-    const [isSelectedStates, setIsSelectedStates] = useState<boolean[]>([]);
+    const [isSelected, setIsSelected] = useState<isSelectedType>({});
     const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
@@ -50,8 +52,20 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
     );
 
     useEffect(() => {
+        const parents = directoryStructure.map((directory) => {
+            return directory.parent;
+        });
+        const isSelectedObject: isSelectedType = {};
+        for (const parent of parents) {
+            const children = Array(
+                directoryStructure.find((directory) => {
+                    return directory.parent === parent;
+                }).children.length
+            ).fill(false);
+            isSelectedObject[parent] = { parent: false, children };
+        }
         setIsOpenStates(Array(directoryStructure.length).fill(false));
-        setIsSelectedStates(Array(directoryStructure.length).fill(false));
+        setIsSelected(isSelectedObject);
     }, [directoryStructure]);
 
     useEffect(() => {
@@ -72,12 +86,39 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
         setIsOpenStates([...isOpenStates].map(() => false));
     };
 
-    const handleIsSelectedStates = (index: number): void => {
-        const newStates = [...isSelectedStates].map(() => false);
-        newStates.splice(index, 1, !newStates[index]);
-        setIsSelectedStates(newStates);
+    const handleChildrenSelect = (parentName: string, childIndex: number): void => {
+        unselectAll();
+        const newStates: isSelectedType = { ...isSelected };
+        newStates[parentName].children[childIndex] = true;
+        setIsSelected(newStates);
     };
 
+    const handleParentSelect = (parentName: string) => {
+        unselectAll();
+        const newStates: isSelectedType = { ...isSelected };
+        newStates[parentName].parent = !newStates[parentName].parent;
+        setIsSelected(newStates);
+    };
+
+    const unselectAll = () => {
+        const newStates: isSelectedType = { ...isSelected };
+        for (const parent of Object.keys(isSelected)) {
+            newStates[parent].parent = false;
+            newStates[parent].children = [...isSelected[parent].children].map(() => false);
+        }
+        setIsSelected(newStates);
+    };
+
+    const getSelectedParentIndex = () => {
+        return Object.keys(isSelected).findIndex((parent) => {
+            return isSelected[parent].parent || isSelected[parent].children.includes(true);
+        });
+    };
+    useEffect(() => {
+        if (!isCreatingNewFolder) return;
+        const index = getSelectedParentIndex();
+        handleIsOpenStates(index, true);
+    }, [isCreatingNewFolder]);
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
             <div
@@ -90,7 +131,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                     display: sidebarWidth <= 30 ? 'none' : 'block',
                 }}
                 onClick={() => {
-                    setIsSelectedStates([...isSelectedStates].map(() => false));
+                    unselectAll();
                     setIsCreatingNewFolder(false);
                 }}
             >
@@ -101,9 +142,17 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setIsCreatingNewFolder(true);
-                                if (isSelectedStates.includes(true)) {
-                                    const index = isSelectedStates.indexOf(true);
-                                    handleIsOpenStates(index, true);
+                                const selectedIndex = Object.keys(isSelected)
+                                    .map((parent) => {
+                                        return isSelected[parent];
+                                    })
+                                    .findIndex((isSelectedArray) => {
+                                        if (isSelectedArray.children.includes(true)) {
+                                            return true;
+                                        }
+                                    });
+                                if (selectedIndex !== -1) {
+                                    handleIsOpenStates(selectedIndex, true);
                                 }
                             }}
                         >
@@ -113,6 +162,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                             <VscCollapseAll size={'2em'} />
                         </div>
                     </div>
+
                     {directoryStructure.map((directory, index) => {
                         return (
                             <div key={directory.parent} className="w-full">
@@ -120,7 +170,24 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                     <ul className="w-full">
                                         <Collapse
                                             summary={
-                                                <div className="flex before:content-['>']">
+                                                <div
+                                                    className={`flex ${
+                                                        isOpenStates[index]
+                                                            ? "before:content-['∨']"
+                                                            : "before:content-['>']"
+                                                    }`}
+                                                    onClick={() => {
+                                                        setIsCreatingNewFolder(false);
+                                                        handleParentSelect(directory.parent);
+                                                    }}
+                                                    style={
+                                                        isSelected[directory.parent]?.parent
+                                                            ? {
+                                                                  backgroundColor: 'rgba(100, 100, 100, 0.3)',
+                                                              }
+                                                            : null
+                                                    }
+                                                >
                                                     <li className="overflow-hidden ml-1">
                                                         <span className="text-xl font-bold cursor-pointer select-none">
                                                             {directory.parent}
@@ -130,62 +197,78 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                             }
                                             details={
                                                 <ul className="overflow-hidden">
-                                                    {isCreatingNewFolder && isSelectedStates[index] && (
-                                                        <div
-                                                            className="ml-4 my-1 flex before:content-['>']"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                            }}
-                                                        >
-                                                            <form
-                                                                onSubmit={(e) => {
-                                                                    e.preventDefault();
-                                                                    if (
-                                                                        directoryStructure[index].children.includes(
-                                                                            newFolderNameInputValue
-                                                                        ) ||
-                                                                        newFolderNameInputValue === ''
-                                                                    ) {
-                                                                        return;
-                                                                    }
-                                                                    const newStates = [...directoryStructure];
-                                                                    newStates[index].children.push(
-                                                                        newFolderNameInputValue
-                                                                    );
-                                                                    setDirectoryStructure(newStates);
-                                                                    setNewFolderNameInputValue('');
+                                                    {isCreatingNewFolder &&
+                                                        (isSelected[directory.parent].children.includes(true) ||
+                                                            isSelected[directory.parent].parent) && (
+                                                            <div
+                                                                className="ml-4 my-1 flex before:content-['>']"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     setIsCreatingNewFolder(false);
-                                                                    global.ipcRenderer.send(
-                                                                        'create-new-folder',
-                                                                        newStates[index].parent,
-                                                                        newFolderNameInputValue
-                                                                    );
                                                                 }}
                                                             >
-                                                                <input
-                                                                    type="text"
-                                                                    defaultValue={newFolderNameInputValue}
-                                                                    onChange={(event) =>
-                                                                        setNewFolderNameInputValue(event.target.value)
-                                                                    }
-                                                                    className="border-2 border-solid border-gray-400 ml-1"
-                                                                    autoFocus={true}
-                                                                />
-                                                            </form>
-                                                        </div>
-                                                    )}
-                                                    {directory.children.map((child) => {
+                                                                <form
+                                                                    onSubmit={(e) => {
+                                                                        e.preventDefault();
+                                                                        if (
+                                                                            directoryStructure[index].children.includes(
+                                                                                newFolderNameInputValue
+                                                                            ) ||
+                                                                            newFolderNameInputValue === ''
+                                                                        ) {
+                                                                            return;
+                                                                        }
+                                                                        const newStates = [...directoryStructure];
+                                                                        newStates[index].children.push(
+                                                                            newFolderNameInputValue
+                                                                        );
+                                                                        setDirectoryStructure(newStates);
+                                                                        setNewFolderNameInputValue('');
+                                                                        setIsCreatingNewFolder(false);
+                                                                        global.ipcRenderer.send(
+                                                                            'create-new-folder',
+                                                                            newStates[index].parent,
+                                                                            newFolderNameInputValue
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <input
+                                                                        type="text"
+                                                                        defaultValue={newFolderNameInputValue}
+                                                                        onChange={(event) =>
+                                                                            setNewFolderNameInputValue(
+                                                                                event.target.value
+                                                                            )
+                                                                        }
+                                                                        className="border-2 border-solid border-gray-400 ml-1"
+                                                                        autoFocus={true}
+                                                                    />
+                                                                </form>
+                                                            </div>
+                                                        )}
+                                                    {directory.children.map((child, index) => {
                                                         return (
                                                             <div
                                                                 key={child}
-                                                                className="ml-4 my-1 flex before:content-['>']"
-                                                                onClick={() => {
+                                                                className="pl-4 my-1 flex before:content-['>']"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setIsCreatingNewFolder(false);
                                                                     getWords(directory.parent, child);
                                                                     setOpenedFolder({
                                                                         parent: directory.parent,
                                                                         folder: child,
                                                                     });
+                                                                    handleChildrenSelect(directory.parent, index);
                                                                 }}
+                                                                style={
+                                                                    isSelected[directory.parent]?.children[index]
+                                                                        ? {
+                                                                              backgroundColor:
+                                                                                  'rgba(100, 100, 100, 0.3)',
+                                                                          }
+                                                                        : null
+                                                                }
                                                             >
                                                                 <li className="ml-1  cursor-pointer">
                                                                     <span className="text-lg inline-block whitespace-nowrap">
@@ -200,17 +283,17 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                             isOpen={isOpenStates[index]}
                                             onClick={handleIsOpenStates}
                                             index={index}
-                                            isSelected={isSelectedStates[index]}
-                                            isSelectedHandler={handleIsSelectedStates}
+                                            parent={directory.parent}
                                         />
                                     </ul>
                                 </div>
                             </div>
                         );
                     })}
+
                     {isCreatingNewFolder &&
-                        isSelectedStates.every((state) => {
-                            return !state;
+                        Object.keys(isSelected).every((parent) => {
+                            return !isSelected[parent].children.includes(true) && !isSelected[parent].parent;
                         }) && (
                             <div
                                 className=" w-full  flex justify-center relative before:content-['>'] before:absolute before:left-1 before:top-2 px-2"
@@ -255,9 +338,13 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
             <div
                 className="grow-0 shrink-0 w-3 justify-end cursor-col-resize resize-x opacity-0 hover:opacity-100 select-none relative right-2 group"
                 onMouseDown={startResizing}
-                style={{
-                    backgroundColor: sidebarWidth === 30 ? 'rgb(59 130 246)' : '',
-                }}
+                style={
+                    sidebarWidth === 30
+                        ? {
+                              backgroundColor: 'rgb(59 130 246)',
+                          }
+                        : null
+                }
             >
                 <div className="w-1 h-full group-hover:bg-blue-500 mx-auto"></div>
             </div>

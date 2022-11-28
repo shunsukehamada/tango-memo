@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 
 type Props = {
     summary: ReactNode;
@@ -6,21 +6,18 @@ type Props = {
     isOpen: boolean;
     index: number;
     onClick?: (index: number) => void;
-    isSelected: boolean;
-    isSelectedHandler: (index: number) => void;
+    parent: string;
 };
 
-const Collapse: React.FC<Props> = ({ summary, details, index, isOpen, onClick, isSelected, isSelectedHandler }) => {
+const Collapse: React.FC<Props> = ({ summary, details, index, isOpen, onClick }) => {
     return (
         <div>
             <div
                 onClick={(e) => {
                     e.stopPropagation();
                     onClick(index);
-                    isSelectedHandler(index);
                 }}
                 className="w-full"
-                style={{ backgroundColor: isSelected ? 'rgb(230, 230, 230)' : 'white' }}
             >
                 {summary}
             </div>
