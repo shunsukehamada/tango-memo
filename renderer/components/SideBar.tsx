@@ -79,9 +79,9 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
     };
 
     return (
-        <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full py-2 relative">
+        <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
             <div
-                className="grow-0 shrink-0 flex border-r-2 border-solid border-gray-400 flex-row bg-white my-2"
+                className="grow-0 shrink-0 flex border-r-2 border-solid border-gray-400 flex-row bg-white my"
                 ref={sidebarRef}
                 style={{
                     width: sidebarWidth,
@@ -253,9 +253,14 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                 </div>
             </div>
             <div
-                className="grow-0 shrink-0 w-2 justify-end cursor-col-resize resize-x opacity-0 hover:w-2 hover:bg-gray-400 hover:opacity-100 select-none rounded-full my-1"
+                className="grow-0 shrink-0 w-3 justify-end cursor-col-resize resize-x opacity-0 hover:opacity-100 select-none relative right-2 group"
                 onMouseDown={startResizing}
-            ></div>
+                style={{
+                    backgroundColor: sidebarWidth === 30 ? 'rgb(59 130 246)' : '',
+                }}
+            >
+                <div className="w-1 h-full group-hover:bg-blue-500 mx-auto"></div>
+            </div>
             <div className="flex-1 flex flex-col bg-white h-full max-h-full z-10"></div>
         </div>
     );

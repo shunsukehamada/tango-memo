@@ -103,10 +103,10 @@ const List = ({ items, setWords, openedFolder, editItems }: Props) => {
                         <div className="flex flex-col h-screen">
                             <div className="flex justify-evenly">
                                 <div className="w-1/2 m-2 mx-10 flex items-center">
-                                    <span className="text-lg font-bold">単語</span>
+                                    <span className="text-lg font-bold select-none">単語</span>
                                 </div>
                                 <div className="w-1/2 m-2 flex justify-between mx-10 items-center">
-                                    <span className="text-lg font-bold">意味</span>
+                                    <span className="text-lg font-bold select-none">意味</span>
                                     <div className="relative">
                                         <label className="cursor-pointer">
                                             <input
