@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import SideBar, { DirectoryStructure } from './SideBar';
+import SideBar, { DirectoryStructure } from './SideBar/SideBar';
 import List, { Word } from './List';
 
 const Layout = () => {

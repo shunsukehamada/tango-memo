@@ -1,15 +1,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import {
-    AnimatePresence,
-    motion,
-    useAnimationControls,
-} from 'framer-motion';
+import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import { RiPencilFill } from 'react-icons/ri';
-import { DirectoryStructure } from '../components/SideBar';
+import { DirectoryStructure } from '../components/SideBar/SideBar';
 type Inputs = {
     english: string;
     japanese: string;

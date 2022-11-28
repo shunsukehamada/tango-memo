@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { VscCollapseAll, VscNewFolder } from 'react-icons/vsc';
 import Collapse from './Collapse';
+import DirectoryList from './DirectoryList';
+import Directory from './DirectoryList';
 
 export type DirectoryStructure = {
     parent: string;
@@ -19,7 +21,7 @@ type Props = {
     >;
 };
 
-type isSelectedType = {
+export type isSelectedType = {
     [parent: DirectoryStructure['parent']]: { parent: boolean; children: boolean[] };
 };
 const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords, setOpenedFolder }: Props) => {
@@ -114,11 +116,13 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
             return isSelected[parent].parent || isSelected[parent].children.includes(true);
         });
     };
+
     useEffect(() => {
         if (!isCreatingNewFolder) return;
         const index = getSelectedParentIndex();
         handleIsOpenStates(index, true);
     }, [isCreatingNewFolder]);
+
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
             <div
@@ -163,7 +167,23 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                         </div>
                     </div>
 
-                    {directoryStructure.map((directory, index) => {
+                    <DirectoryList
+                        getWords={getWords}
+                        directoryStructure={directoryStructure}
+                        setDirectoryStructure={setDirectoryStructure}
+                        isCreatingNewFolder={isCreatingNewFolder}
+                        setIsCreatingNewFolder={setIsCreatingNewFolder}
+                        newFolderNameInputValue={newFolderNameInputValue}
+                        setNewFolderNameInputValue={setNewFolderNameInputValue}
+                        handleParentSelect={handleParentSelect}
+                        handleChildrenSelect={handleChildrenSelect}
+                        isSelected={isSelected}
+                        // setIsSelected={setIsSelected}
+                        isOpenStates={isOpenStates}
+                        setOpenedFolder={setOpenedFolder}
+                        handleIsOpenStates={handleIsOpenStates}
+                    />
+                    {/* {directoryStructure.map((directory, index) => {
                         return (
                             <div key={directory.parent} className="w-full">
                                 <div className="pl-1 pt-3 overflow-hidden flex flex-col items-start">
@@ -289,7 +309,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                 </div>
                             </div>
                         );
-                    })}
+                    })} */}
 
                     {isCreatingNewFolder &&
                         Object.keys(isSelected).every((parent) => {

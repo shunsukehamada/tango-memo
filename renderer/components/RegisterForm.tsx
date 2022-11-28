@@ -3,7 +3,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { RiPencilFill } from 'react-icons/ri';
 import Select from 'react-select';
 import { Word } from './List';
-import { DirectoryStructure } from './SideBar';
+import { DirectoryStructure } from './SideBar/SideBar';
 
 type Inputs = {
     english: string;
