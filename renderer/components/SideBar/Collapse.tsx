@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 import { DirectoryStructure, isSelectedType } from './SideBar';
 
 type Props = {
@@ -60,10 +60,10 @@ const Collapse: React.FC<Props> = ({
                     className={`flex ${isOpenStates[index] ? "before:content-['∨']" : "before:content-['>']"}`}
                     onClick={() => {
                         setIsCreatingNewFolder(false);
-                        handleParentSelect(directory.parent);
+                        handleParentSelect(directory?.parent);
                     }}
                     style={
-                        isSelected[directory.parent]?.parent
+                        isSelected[directory?.parent]?.parent
                             ? {
                                   backgroundColor: 'rgba(100, 100, 100, 0.3)',
                               }
@@ -71,7 +71,7 @@ const Collapse: React.FC<Props> = ({
                     }
                 >
                     <li className="overflow-hidden ml-1">
-                        <span className="text-xl font-bold cursor-pointer select-none">{directory.parent}</span>
+                        <span className="text-xl font-bold cursor-pointer select-none">{directory?.parent}</span>
                     </li>
                 </div>
             </div>
@@ -79,8 +79,8 @@ const Collapse: React.FC<Props> = ({
                 <div>
                     <ul className="overflow-hidden">
                         {isCreatingNewFolder &&
-                            (isSelected[directory.parent].children.includes(true) ||
-                                isSelected[directory.parent].parent) && (
+                            (isSelected[directory?.parent].children.includes(true) ||
+                                isSelected[directory?.parent]?.parent) && (
                                 <div
                                     className="ml-4 my-1 flex before:content-['>']"
                                     onClick={(e) => {
@@ -104,7 +104,7 @@ const Collapse: React.FC<Props> = ({
                                             setIsCreatingNewFolder(false);
                                             global.ipcRenderer.send(
                                                 'create-new-folder',
-                                                newStates[index].parent,
+                                                newStates[index]?.parent,
                                                 newFolderNameInputValue
                                             );
                                         }}
@@ -119,7 +119,7 @@ const Collapse: React.FC<Props> = ({
                                     </form>
                                 </div>
                             )}
-                        {directory.children.map((child, index) => {
+                        {directory?.children.map((child, index) => {
                             return (
                                 <div
                                     key={child}
@@ -127,15 +127,15 @@ const Collapse: React.FC<Props> = ({
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setIsCreatingNewFolder(false);
-                                        getWords(directory.parent, child);
+                                        getWords(directory?.parent, child);
                                         setOpenedFolder({
-                                            parent: directory.parent,
+                                            parent: directory?.parent,
                                             folder: child,
                                         });
-                                        handleChildrenSelect(directory.parent, index);
+                                        handleChildrenSelect(directory?.parent, index);
                                     }}
                                     style={
-                                        isSelected[directory.parent]?.children[index]
+                                        isSelected[directory?.parent]?.children[index]
                                             ? {
                                                   backgroundColor: 'rgba(100, 100, 100, 0.3)',
                                               }
