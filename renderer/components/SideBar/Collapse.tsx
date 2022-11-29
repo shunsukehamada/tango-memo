@@ -26,6 +26,7 @@ type Props = {
         }>
     ) => void;
     handleChildrenSelect: (parentName: string, childIndex: number) => void;
+    handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => void;
 };
 
 const Collapse: React.FC<Props> = ({
@@ -46,6 +47,7 @@ const Collapse: React.FC<Props> = ({
     getWords,
     setOpenedFolder,
     handleChildrenSelect,
+    handleContextMenu,
 }) => {
     return (
         <div>
@@ -55,6 +57,9 @@ const Collapse: React.FC<Props> = ({
                     onClick(index);
                 }}
                 className="w-full"
+                onContextMenu={(e) => {
+                    handleContextMenu(e, parent);
+                }}
             >
                 <div
                     className={`flex ${isOpenStates[index] ? "before:content-['∨']" : "before:content-['>']"}`}
@@ -133,6 +138,9 @@ const Collapse: React.FC<Props> = ({
                                             folder: child,
                                         });
                                         handleChildrenSelect(directory?.parent, index);
+                                    }}
+                                    onContextMenu={(e) => {
+                                        handleContextMenu(e, parent, child);
                                     }}
                                     style={
                                         isSelected[directory?.parent]?.children[index]

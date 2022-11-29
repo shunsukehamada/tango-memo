@@ -22,6 +22,7 @@ type Props = {
             folder: string;
         }>
     ) => void;
+    handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => void;
 };
 
 const DirectoryList: React.FC<Props> = ({
@@ -38,6 +39,7 @@ const DirectoryList: React.FC<Props> = ({
     isOpenStates,
     setOpenedFolder,
     handleIsOpenStates,
+    handleContextMenu,
 }) => {
     return (
         <div>
@@ -64,6 +66,7 @@ const DirectoryList: React.FC<Props> = ({
                                     getWords={getWords}
                                     setOpenedFolder={setOpenedFolder}
                                     handleChildrenSelect={handleChildrenSelect}
+                                    handleContextMenu={handleContextMenu}
                                 />
                             </ul>
                         </div>

@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
-import { VscCollapseAll, VscNewFolder } from 'react-icons/vsc';
+import { Item, ItemParams, Menu, useContextMenu } from 'react-contexify';
+import { VscCollapseAll, VscEdit, VscNewFolder, VscTrash } from 'react-icons/vsc';
 import DirectoryList from './DirectoryList';
 
 export type DirectoryStructure = {
@@ -122,6 +123,34 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
         handleIsOpenStates(index, true);
     }, [isCreatingNewFolder]);
 
+    const MENU_ID = 'directory';
+    const { show } = useContextMenu({
+        id: MENU_ID,
+    });
+
+    const handleContextMenu = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => {
+        show({
+            event,
+            props: {
+                parent,
+                child,
+            },
+        });
+    };
+
+    const handleItemClick = ({ id, props }: ItemParams<{ parent: string; child?: string }>) => {
+        if (id === 'delete') {
+            props.child
+                ? global.ipcRenderer.send('delete-child-folder', props)
+                : global.ipcRenderer.send('delete-parent-folder', props);
+
+            return;
+        }
+        if (id === 'edit') {
+            console.log(props);
+            return;
+        }
+    };
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
             <div
@@ -180,6 +209,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                         isOpenStates={isOpenStates}
                         setOpenedFolder={setOpenedFolder}
                         handleIsOpenStates={handleIsOpenStates}
+                        handleContextMenu={handleContextMenu}
                     />
 
                     {isCreatingNewFolder &&
@@ -240,6 +270,16 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                 <div className="w-1 h-full group-hover:bg-blue-500 mx-auto"></div>
             </div>
             <div className="flex-1 flex flex-col bg-white h-full max-h-full z-10"></div>
+            <Menu id={MENU_ID}>
+                <Item id="delete" onClick={handleItemClick}>
+                    <VscTrash />
+                    削除
+                </Item>
+                <Item id="edit" onClick={handleItemClick}>
+                    <VscEdit />
+                    編集
+                </Item>
+            </Menu>
         </div>
     );
 };

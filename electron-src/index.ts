@@ -393,3 +393,121 @@ ipcMain.handle('get-folder', async (_e: IpcMainInvokeEvent, id: number): Promise
         value: { parent: parentName, child: folderName },
     };
 });
+
+const getFolderId = async (db: sqlite3.Database, parentName: string, childName: string): Promise<number> => {
+    const parentId: number = await new Promise<number>((resolve, reject) => {
+        db.get('select id from parent_folders where name = ?', parentName, (err: Error | null, row: { id: number }) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row.id);
+        });
+    });
+    const folderId: number = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from folders where parent_id = ? and name = ?',
+            parentId,
+            childName,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    return folderId;
+};
+
+const getFolderIds = async (db: sqlite3.Database, parentName: string): Promise<[number, number[]]> => {
+    const parentId: number = await new Promise<number>((resolve, reject) => {
+        db.get('select id from parent_folders where name = ?', parentName, (err: Error | null, row: { id: number }) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row.id);
+        });
+    });
+    const folderIds = await new Promise<number[]>((resolve, reject) => {
+        db.all('select id from folders where parent_id = ?', parentId, (err: Error | null, rows: { id: number }[]) => {
+            if (err) {
+                reject(err);
+            }
+
+            resolve(rows.map((row) => row.id));
+        });
+    });
+    return [parentId, folderIds];
+};
+
+const deleteWordsAndPos = (db: sqlite3.Database, wordId: number): void => {
+    db.run('delete from words where id = ?', wordId, (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+    db.run('delete from words_poss where words_id = ?', wordId, (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+};
+
+const deleteChildFolder = async (db: sqlite3.Database, folderId: number) => {
+    db.run('delete from folders where id = ?', folderId, (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+    const wordIds = await new Promise<number[]>((resolve, reject) => {
+        db.all('select id from words where folder_id = ?', folderId, (err: Error | null, rows: { id: number }[]) => {
+            if (err) {
+                reject(err);
+            }
+
+            resolve(rows.map((row) => row.id));
+        });
+    });
+    for (const id of wordIds) {
+        deleteWordsAndPos(db, id);
+    }
+};
+
+ipcMain.on(
+    'delete-child-folder',
+    async (
+        _e: IpcMainEvent,
+        {
+            parent,
+            child,
+        }: {
+            parent: string;
+            child: string;
+        }
+    ) => {
+        const db = new sqlite3.Database(
+            isDev
+                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+        );
+        const folderId = await getFolderId(db, parent, child);
+        deleteChildFolder(db, folderId);
+    }
+);
+
+ipcMain.on('delete-parent-folder', async (_e: IpcMainEvent, { parent }) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const [parentId, folderIds] = await getFolderIds(db, parent);
+    db.run('delete from parent_folders where id = ?', parentId, (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+    for (const folderId of folderIds) {
+        deleteChildFolder(db, folderId);
+    }
+});
