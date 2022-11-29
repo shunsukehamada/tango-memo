@@ -1,18 +1,19 @@
 import { ReactNode, useContext } from 'react';
-import { DirectoryStructure, isSelectedType } from './SideBar';
+import { DirectoryStructure, isOpenStatesType, isSelectedType } from './SideBar';
 
 type Props = {
     // summary: ReactNode;
     // details: ReactNode;
-    isOpen: boolean;
+    // isOpen: boolean;
     index: number;
-    onClick?: (index: number) => void;
+    onClick?: (parent: string, open?: boolean) => void;
     parent: string;
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
     handleParentSelect: (parentName: string) => void;
     directory: DirectoryStructure;
     isSelected: isSelectedType;
-    isOpenStates: boolean[];
+    isOpenStates: isOpenStatesType;
+    handleIsOpenStates: (parent: string, open?: boolean) => void;
     isCreatingNewFolder: boolean;
     directoryStructure: DirectoryStructure[];
     newFolderNameInputValue: string;
@@ -30,7 +31,7 @@ type Props = {
 };
 
 const Collapse: React.FC<Props> = ({
-    isOpen,
+    // isOpen,
     index,
     onClick,
     parent,
@@ -39,6 +40,7 @@ const Collapse: React.FC<Props> = ({
     directory,
     isSelected,
     isOpenStates,
+    handleIsOpenStates,
     isCreatingNewFolder,
     directoryStructure,
     newFolderNameInputValue,
@@ -54,7 +56,7 @@ const Collapse: React.FC<Props> = ({
             <div
                 onClick={(e) => {
                     e.stopPropagation();
-                    onClick(index);
+                    onClick(parent);
                 }}
                 className="w-full"
                 onContextMenu={(e) => {
@@ -62,10 +64,13 @@ const Collapse: React.FC<Props> = ({
                 }}
             >
                 <div
-                    className={`flex ${isOpenStates[index] ? "before:content-['∨']" : "before:content-['>']"}`}
+                    className={`flex ${
+                        isOpenStates && isOpenStates[parent] ? "before:content-['∨']" : "before:content-['>']"
+                    }`}
                     onClick={() => {
                         setIsCreatingNewFolder(false);
                         handleParentSelect(directory?.parent);
+                        handleIsOpenStates(parent, true);
                     }}
                     style={
                         isSelected[directory?.parent]?.parent
@@ -80,7 +85,7 @@ const Collapse: React.FC<Props> = ({
                     </li>
                 </div>
             </div>
-            {isOpen && (
+            {isOpenStates && isOpenStates[parent] && (
                 <div>
                     <ul className="overflow-hidden">
                         {isCreatingNewFolder &&

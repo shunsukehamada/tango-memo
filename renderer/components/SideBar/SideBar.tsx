@@ -4,8 +4,8 @@ import { VscCollapseAll, VscEdit, VscNewFolder, VscTrash } from 'react-icons/vsc
 import DirectoryList from './DirectoryList';
 
 export type DirectoryStructure = {
-    parent: string;
-    children: string[];
+    readonly parent: string;
+    readonly children: string[];
 };
 
 type Props = {
@@ -24,11 +24,17 @@ export type isSelectedType = {
     [parent: DirectoryStructure['parent']]: { parent: boolean; children: boolean[] };
 };
 
+export type isOpenStatesType = {
+    [parent: DirectoryStructure['parent']]: boolean;
+};
+
 const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords, setOpenedFolder }: Props) => {
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
-    const [isOpenStates, setIsOpenStates] = useState<boolean[]>([]);
+    const [isOpenStates, setIsOpenStates] = useState<isOpenStatesType>();
     const [isSelected, setIsSelected] = useState<isSelectedType>({});
+    const [initializedOpenStates, setInitializedOpenStates] = useState<boolean>(false);
     const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
+    const [isDeletingFolder, setIsDeletingFolder] = useState<boolean>(false);
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(268);
@@ -54,21 +60,36 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
     );
 
     useEffect(() => {
-        const parents = directoryStructure.map((directory) => {
+        const parents = [...directoryStructure].map((directory) => {
             return directory.parent;
         });
         const isSelectedObject: isSelectedType = {};
         for (const parent of parents) {
             const children = Array(
-                directoryStructure.find((directory) => {
+                [...directoryStructure].find((directory) => {
                     return directory.parent === parent;
                 }).children.length
             ).fill(false);
             isSelectedObject[parent] = { parent: false, children };
         }
-        setIsOpenStates(Array(directoryStructure.length).fill(false));
+        if (!initializedOpenStates) {
+            const newStates: isOpenStatesType = {};
+            [...directoryStructure].map((directory) => {
+                newStates[directory.parent] = false;
+            });
+            setIsOpenStates(newStates);
+            if (directoryStructure.length > 1) {
+                setInitializedOpenStates(true);
+            }
+        }
         setIsSelected(isSelectedObject);
     }, [directoryStructure]);
+
+    useEffect(() => {
+        if (isDeletingFolder) {
+            setIsDeletingFolder(false);
+        }
+    }, [isDeletingFolder]);
 
     useEffect(() => {
         window.addEventListener('mousemove', resize);
@@ -79,13 +100,17 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
         };
     }, [resize, stopResizing]);
 
-    const handleIsOpenStates = (index: number, open: boolean = false): void => {
-        const newStates = [...isOpenStates];
-        newStates.splice(index, 1, open ? true : !newStates[index]);
+    const handleIsOpenStates = (parent: string, open: boolean = false): void => {
+        const newStates = { ...isOpenStates };
+        newStates[parent] = open ? true : !newStates[parent];
         setIsOpenStates(newStates);
     };
     const collapseAll = () => {
-        setIsOpenStates([...isOpenStates].map(() => false));
+        const newStates = {};
+        for (const parent of Object.keys(isOpenStates)) {
+            newStates[parent] = false;
+        }
+        setIsOpenStates(newStates);
     };
 
     const handleChildrenSelect = (parentName: string, childIndex: number): void => {
@@ -120,7 +145,7 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
     useEffect(() => {
         if (!isCreatingNewFolder) return;
         const index = getSelectedParentIndex();
-        handleIsOpenStates(index, true);
+        handleIsOpenStates(directoryStructure[index]?.parent, true);
     }, [isCreatingNewFolder]);
 
     const MENU_ID = 'directory';
@@ -138,12 +163,30 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
         });
     };
 
+    const deleteFolder = (parent: string, child?: string) => {
+        if (!child) {
+            const newDirectoryStructure = [...directoryStructure].filter((directory) => directory.parent !== parent);
+            setDirectoryStructure(newDirectoryStructure);
+            return;
+        }
+        const newDirectoryStructure: DirectoryStructure[] = [...directoryStructure].map((directory) => {
+            if (directory.parent !== parent) return directory;
+
+            const deletedChildren = directory.children.filter((_child) => _child !== child);
+
+            return { parent: directory.parent, children: deletedChildren };
+        });
+        setDirectoryStructure(newDirectoryStructure);
+    };
     const handleItemClick = ({ id, props }: ItemParams<{ parent: string; child?: string }>) => {
         if (id === 'delete') {
-            props.child
-                ? global.ipcRenderer.send('delete-child-folder', props)
-                : global.ipcRenderer.send('delete-parent-folder', props);
-
+            if (confirm(`${props.child ? `${props.parent}/${props.child}` : props.parent}を削除しますか?`)) {
+                setIsDeletingFolder(true);
+                props.child
+                    ? global.ipcRenderer.send('delete-child-folder', props)
+                    : global.ipcRenderer.send('delete-parent-folder', props);
+                deleteFolder(props.parent, props.child);
+            }
             return;
         }
         if (id === 'edit') {
@@ -182,9 +225,10 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                                         if (isSelectedArray.children.includes(true)) {
                                             return true;
                                         }
+                                        return false;
                                     });
                                 if (selectedIndex !== -1) {
-                                    handleIsOpenStates(selectedIndex, true);
+                                    handleIsOpenStates(directoryStructure[selectedIndex].parent, true);
                                 }
                             }}
                         >
@@ -207,8 +251,9 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                         isSelected={isSelected}
                         // setIsSelected={setIsSelected}
                         isOpenStates={isOpenStates}
-                        setOpenedFolder={setOpenedFolder}
                         handleIsOpenStates={handleIsOpenStates}
+                        setIsOpenStates={setIsOpenStates}
+                        setOpenedFolder={setOpenedFolder}
                         handleContextMenu={handleContextMenu}
                     />
 
