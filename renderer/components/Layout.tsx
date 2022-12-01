@@ -1,21 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import SideBar, { DirectoryStructure } from './SideBar/SideBar';
+import React, { useState } from 'react';
+import SideBar from './SideBar/SideBar';
 import List, { Word } from './List';
+import DirectoryProvider from './SideBar/Providers/DirectoryProvider';
 
 const Layout = () => {
     // build時は削除
-    const [winReady, setWinReady] = useState(false);
-    const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
     const [openedFolder, setOpenedFolder] = useState<{ parent: string; folder: string } | null>(null);
     const [words, setWords] = useState<Word[]>([]);
-    useEffect(() => {
-        setWinReady(true);
-        const getAllFolders = async () => {
-            const allFolders = await global.ipcRenderer.invoke('get-all-folders');
-            setDirectoryStructureState(allFolders);
-        };
-        getAllFolders();
-    }, []);
 
     const getWords = async (parentFolder: string, folder: string): Promise<void> => {
         const words: Word[] = await global.ipcRenderer.invoke('get-words', parentFolder, folder);
@@ -45,18 +36,13 @@ const Layout = () => {
     return (
         <div className="flex overflow-y-hidden">
             <div className="h-screen flex items-center">
-                <SideBar
-                    directoryStructure={directoryStructureState}
-                    setDirectoryStructure={setDirectoryStructureState}
-                    getWords={getWords}
-                    setOpenedFolder={setOpenedFolder}
-                />
+                <DirectoryProvider>
+                    <SideBar getWords={getWords} setOpenedFolder={setOpenedFolder} />
+                </DirectoryProvider>
             </div>
 
             <div className="flex-1">
-                {winReady && (
-                    <List items={words} setWords={setWords} openedFolder={openedFolder} editItems={editListItem} />
-                )}
+                <List items={words} setWords={setWords} openedFolder={openedFolder} editItems={editListItem} />
             </div>
             {/* <div className="flex-1">
                 <List items={words} />

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import Collapse from './Collapse';
-import { DirectoryStructure, isOpenStatesType, isSelectedType } from './SideBar';
+import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
+import { isOpenStatesType, isSelectedType } from './SideBar';
 
 type Props = {
-    directoryStructure: DirectoryStructure[];
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
     isSelected: isSelectedType;
     // setIsSelected: React.Dispatch<React.SetStateAction<isSelectedType>>
@@ -14,7 +14,6 @@ type Props = {
     handleIsOpenStates: (parent: string, open?: boolean) => void;
     isCreatingNewFolder: boolean;
     setNewFolderNameInputValue: (value: React.SetStateAction<string>) => void;
-    setDirectoryStructure: (value: React.SetStateAction<DirectoryStructure[]>) => void;
     newFolderNameInputValue: string;
     getWords: (parentFolder: string, folder: string) => Promise<void>;
     setOpenedFolder: (
@@ -28,8 +27,6 @@ type Props = {
 
 const DirectoryList: React.FC<Props> = ({
     getWords,
-    directoryStructure,
-    setDirectoryStructure,
     isCreatingNewFolder,
     setIsCreatingNewFolder,
     newFolderNameInputValue,
@@ -43,6 +40,8 @@ const DirectoryList: React.FC<Props> = ({
     handleIsOpenStates,
     handleContextMenu,
 }) => {
+    const directoryStructure = useContext(directoryContext);
+    const setDirectoryStructure = useContext(setDirectoryContext);
     return (
         <div>
             {directoryStructure.map((directory, index) => {
@@ -62,9 +61,7 @@ const DirectoryList: React.FC<Props> = ({
                                     isOpenStates={isOpenStates}
                                     handleIsOpenStates={handleIsOpenStates}
                                     isCreatingNewFolder={isCreatingNewFolder}
-                                    directoryStructure={directoryStructure}
                                     newFolderNameInputValue={newFolderNameInputValue}
-                                    setDirectoryStructure={setDirectoryStructure}
                                     setNewFolderNameInputValue={setNewFolderNameInputValue}
                                     getWords={getWords}
                                     setOpenedFolder={setOpenedFolder}

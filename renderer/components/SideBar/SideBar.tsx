@@ -1,6 +1,7 @@
-import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Item, ItemParams, Menu, useContextMenu } from 'react-contexify';
 import { VscCollapseAll, VscEdit, VscNewFolder, VscTrash } from 'react-icons/vsc';
+import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import DirectoryList from './DirectoryList';
 
 export type DirectoryStructure = {
@@ -9,8 +10,8 @@ export type DirectoryStructure = {
 };
 
 type Props = {
-    directoryStructure: DirectoryStructure[];
-    setDirectoryStructure: React.Dispatch<React.SetStateAction<DirectoryStructure[]>>;
+    // directoryStructure: DirectoryStructure[];
+
     getWords: (parentFolder: string, folder: string) => Promise<void>;
     setOpenedFolder: React.Dispatch<
         React.SetStateAction<{
@@ -28,7 +29,10 @@ export type isOpenStatesType = {
     [parent: DirectoryStructure['parent']]: boolean;
 };
 
-const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, getWords, setOpenedFolder }: Props) => {
+const SideBar: React.FC<Props> = ({ getWords, setOpenedFolder }: Props) => {
+    // const [directoryStructure, setDirectoryStructure] = useState<DirectoryStructure[]>([]);
+    const directoryStructure = useContext(directoryContext);
+    const setDirectoryStructure = useContext(setDirectoryContext);
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     const [isOpenStates, setIsOpenStates] = useState<isOpenStatesType>();
     const [isSelected, setIsSelected] = useState<isSelectedType>({});
@@ -240,8 +244,6 @@ const SideBar: React.FC<Props> = ({ directoryStructure, setDirectoryStructure, g
                     </div>
                     <DirectoryList
                         getWords={getWords}
-                        directoryStructure={directoryStructure}
-                        setDirectoryStructure={setDirectoryStructure}
                         isCreatingNewFolder={isCreatingNewFolder}
                         setIsCreatingNewFolder={setIsCreatingNewFolder}
                         newFolderNameInputValue={newFolderNameInputValue}
