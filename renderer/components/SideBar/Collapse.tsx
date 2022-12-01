@@ -1,7 +1,8 @@
 import { useContext } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
-import { DirectoryStructure, isOpenStatesType, isSelectedType } from './SideBar';
+import { isSelectedContext } from './Providers/IsSelectedProvider';
+import { DirectoryStructure, isOpenStatesType } from './SideBar';
 
 type Props = {
     // summary: ReactNode;
@@ -13,7 +14,6 @@ type Props = {
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
     handleParentSelect: (parentName: string) => void;
     directory: DirectoryStructure;
-    isSelected: isSelectedType;
     isOpenStates: isOpenStatesType;
     handleIsOpenStates: (parent: string, open?: boolean) => void;
     isCreatingNewFolder: boolean;
@@ -37,7 +37,6 @@ const Collapse: React.FC<Props> = ({
     setIsCreatingNewFolder,
     handleParentSelect,
     directory,
-    isSelected,
     isOpenStates,
     handleIsOpenStates,
     isCreatingNewFolder,
@@ -50,6 +49,7 @@ const Collapse: React.FC<Props> = ({
     const directoryStructure = useContext(directoryContext);
     const setDirectoryStructure = useContext(setDirectoryContext);
     const getWords = useContext(getWordsContext);
+    const isSelected = useContext(isSelectedContext);
     return (
         <div>
             <div

@@ -4,6 +4,7 @@ import List, { Word } from './List/List';
 import DirectoryProvider from './SideBar/Providers/DirectoryProvider';
 import GetWordsProvider from './SideBar/Providers/GetWordsProvider';
 import WordsProvider, { setWordsContext, wordsContext } from './List/Providers/WordsProvider';
+import IsSelectedProvider from './SideBar/Providers/IsSelectedProvider';
 
 const Layout = () => {
     // build時は削除
@@ -37,7 +38,9 @@ const Layout = () => {
                 <div className="h-screen flex items-center">
                     <DirectoryProvider>
                         <GetWordsProvider>
-                            <SideBar setOpenedFolder={setOpenedFolder} />
+                            <IsSelectedProvider>
+                                <SideBar setOpenedFolder={setOpenedFolder} />
+                            </IsSelectedProvider>
                         </GetWordsProvider>
                     </DirectoryProvider>
                 </div>

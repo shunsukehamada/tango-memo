@@ -1,12 +1,10 @@
 import React, { useContext } from 'react';
 import Collapse from './Collapse';
 import { directoryContext } from './Providers/DirectoryProvider';
-import { isOpenStatesType, isSelectedType } from './SideBar';
+import { isOpenStatesType } from './SideBar';
 
 type Props = {
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
-    isSelected: isSelectedType;
-    // setIsSelected: React.Dispatch<React.SetStateAction<isSelectedType>>
     handleChildrenSelect: (parentName: string, childIndex: number) => void;
     handleParentSelect: (parentName: string) => void;
     isOpenStates: isOpenStatesType;
@@ -29,7 +27,6 @@ const DirectoryList: React.FC<Props> = ({
     setIsCreatingNewFolder,
     newFolderNameInputValue,
     setNewFolderNameInputValue,
-    isSelected,
     handleParentSelect,
     handleChildrenSelect,
     isOpenStates,
@@ -54,7 +51,6 @@ const DirectoryList: React.FC<Props> = ({
                                     setIsCreatingNewFolder={setIsCreatingNewFolder}
                                     handleParentSelect={handleParentSelect}
                                     directory={directory}
-                                    isSelected={isSelected}
                                     isOpenStates={isOpenStates}
                                     handleIsOpenStates={handleIsOpenStates}
                                     isCreatingNewFolder={isCreatingNewFolder}
