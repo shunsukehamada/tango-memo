@@ -7,6 +7,10 @@ import { isSelectedContext, setIsSelectedContext } from './Providers/IsSelectedP
 import { isOpenStatesContext, setIsOpenStatesContext } from './Providers/IsOpenStatesProvider';
 import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
 import { handleSelectContext } from './Providers/HandleSelectProvider';
+import {
+    newFolderNameInputValueContext,
+    setNewFolderNameInputValueContext,
+} from './Providers/newFolderNameInputValueProvider';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -39,9 +43,11 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
     const setIsOpenStates = useContext(setIsOpenStatesContext);
     const handleIsOpenStates = useContext(handleIsOpenStatesContext);
     const { unselectAll } = useContext(handleSelectContext);
+    const newFolderNameInputValue = useContext(newFolderNameInputValueContext);
+    const setNewFolderNameInputValue = useContext(setNewFolderNameInputValueContext);
+
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     const [initializedOpenStates, setInitializedOpenStates] = useState<boolean>(false);
-    const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
     const [isDeletingFolder, setIsDeletingFolder] = useState<boolean>(false);
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
@@ -221,8 +227,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                     <DirectoryList
                         isCreatingNewFolder={isCreatingNewFolder}
                         setIsCreatingNewFolder={setIsCreatingNewFolder}
-                        newFolderNameInputValue={newFolderNameInputValue}
-                        setNewFolderNameInputValue={setNewFolderNameInputValue}
                         setOpenedFolder={setOpenedFolder}
                         handleContextMenu={handleContextMenu}
                     />

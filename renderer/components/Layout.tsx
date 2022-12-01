@@ -8,6 +8,7 @@ import IsSelectedProvider from './SideBar/Providers/IsSelectedProvider';
 import IsOpenStatesProvider from './SideBar/Providers/IsOpenStatesProvider';
 import HandleIsOpenStatesProvider from './SideBar/Providers/HandleIsOpenStatesProvider';
 import HandleSelectProvider from './SideBar/Providers/HandleSelectProvider';
+import NewFolderInputValue from './SideBar/Providers/HandleSelectProvider';
 
 const Layout = () => {
     // build時は削除
@@ -45,7 +46,9 @@ const Layout = () => {
                                 <IsOpenStatesProvider>
                                     <HandleIsOpenStatesProvider>
                                         <HandleSelectProvider>
-                                            <SideBar setOpenedFolder={setOpenedFolder} />
+                                            <NewFolderInputValue>
+                                                <SideBar setOpenedFolder={setOpenedFolder} />
+                                            </NewFolderInputValue>
                                         </HandleSelectProvider>
                                     </HandleIsOpenStatesProvider>
                                 </IsOpenStatesProvider>

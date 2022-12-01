@@ -5,6 +5,10 @@ import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvide
 import { handleSelectContext } from './Providers/HandleSelectProvider';
 import { isOpenStatesContext } from './Providers/IsOpenStatesProvider';
 import { isSelectedContext } from './Providers/IsSelectedProvider';
+import {
+    newFolderNameInputValueContext,
+    setNewFolderNameInputValueContext,
+} from './Providers/newFolderNameInputValueProvider';
 import { DirectoryStructure } from './SideBar';
 
 type Props = {
@@ -16,8 +20,6 @@ type Props = {
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
     directory: DirectoryStructure;
     isCreatingNewFolder: boolean;
-    newFolderNameInputValue: string;
-    setNewFolderNameInputValue: (value: React.SetStateAction<string>) => void;
     setOpenedFolder: (
         value: React.SetStateAction<{
             parent: string;
@@ -34,8 +36,6 @@ const Collapse: React.FC<Props> = ({
     setIsCreatingNewFolder,
     directory,
     isCreatingNewFolder,
-    newFolderNameInputValue,
-    setNewFolderNameInputValue,
     setOpenedFolder,
     handleContextMenu,
 }) => {
@@ -46,6 +46,8 @@ const Collapse: React.FC<Props> = ({
     const isOpenStates = useContext(isOpenStatesContext);
     const handleIsOpenStates = useContext(handleIsOpenStatesContext);
     const { handleChildrenSelect, handleParentSelect } = useContext(handleSelectContext);
+    const newFolderNameInputValue = useContext(newFolderNameInputValueContext);
+    const setNewFolderNameInputValue = useContext(setNewFolderNameInputValueContext);
     return (
         <div>
             <div
