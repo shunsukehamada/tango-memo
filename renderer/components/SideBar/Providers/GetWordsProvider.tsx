@@ -13,7 +13,6 @@ const GetWordsProvider: React.FC<Props> = ({ children }) => {
     const getWords = async (parentFolder: string, folder: string): Promise<void> => {
         const words: Word[] = await global.ipcRenderer.invoke('get-words', parentFolder, folder);
         setWords(words);
-        console.log(words);
     };
     return <getWordsContext.Provider value={getWords}>{children}</getWordsContext.Provider>;
 };
