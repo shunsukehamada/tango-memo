@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
+import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
 import { isOpenStatesContext } from './Providers/IsOpenStatesProvider';
 import { isSelectedContext } from './Providers/IsSelectedProvider';
 import { DirectoryStructure } from './SideBar';
@@ -10,12 +11,10 @@ type Props = {
     // details: ReactNode;
     // isOpen: boolean;
     index: number;
-    onClick?: (parent: string, open?: boolean) => void;
     parent: string;
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
     handleParentSelect: (parentName: string) => void;
     directory: DirectoryStructure;
-    handleIsOpenStates: (parent: string, open?: boolean) => void;
     isCreatingNewFolder: boolean;
     newFolderNameInputValue: string;
     setNewFolderNameInputValue: (value: React.SetStateAction<string>) => void;
@@ -32,12 +31,10 @@ type Props = {
 const Collapse: React.FC<Props> = ({
     // isOpen,
     index,
-    onClick,
     parent,
     setIsCreatingNewFolder,
     handleParentSelect,
     directory,
-    handleIsOpenStates,
     isCreatingNewFolder,
     newFolderNameInputValue,
     setNewFolderNameInputValue,
@@ -50,12 +47,13 @@ const Collapse: React.FC<Props> = ({
     const getWords = useContext(getWordsContext);
     const isSelected = useContext(isSelectedContext);
     const isOpenStates = useContext(isOpenStatesContext);
+    const handleIsOpenStates = useContext(handleIsOpenStatesContext);
     return (
         <div>
             <div
                 onClick={(e) => {
                     e.stopPropagation();
-                    onClick(parent);
+                    handleIsOpenStates(parent);
                 }}
                 className="w-full"
                 onContextMenu={(e) => {

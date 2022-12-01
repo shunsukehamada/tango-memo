@@ -5,6 +5,7 @@ import { directoryContext, setDirectoryContext } from './Providers/DirectoryProv
 import DirectoryList from './DirectoryList';
 import { isSelectedContext, setIsSelectedContext } from './Providers/IsSelectedProvider';
 import { isOpenStatesContext, setIsOpenStatesContext } from './Providers/IsOpenStatesProvider';
+import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -35,6 +36,7 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
     const setIsSelected = useContext(setIsSelectedContext);
     const isOpenStates = useContext(isOpenStatesContext);
     const setIsOpenStates = useContext(setIsOpenStatesContext);
+    const handleIsOpenStates = useContext(handleIsOpenStatesContext)
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     const [initializedOpenStates, setInitializedOpenStates] = useState<boolean>(false);
     const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
@@ -104,11 +106,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
         };
     }, [resize, stopResizing]);
 
-    const handleIsOpenStates = (parent: string, open: boolean = false): void => {
-        const newStates = { ...isOpenStates };
-        newStates[parent] = open ? true : !newStates[parent];
-        setIsOpenStates(newStates);
-    };
     const collapseAll = () => {
         const newStates = {};
         for (const parent of Object.keys(isOpenStates)) {
@@ -249,7 +246,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                         setNewFolderNameInputValue={setNewFolderNameInputValue}
                         handleParentSelect={handleParentSelect}
                         handleChildrenSelect={handleChildrenSelect}
-                        handleIsOpenStates={handleIsOpenStates}
                         setOpenedFolder={setOpenedFolder}
                         handleContextMenu={handleContextMenu}
                     />

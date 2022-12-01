@@ -6,7 +6,6 @@ type Props = {
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
     handleChildrenSelect: (parentName: string, childIndex: number) => void;
     handleParentSelect: (parentName: string) => void;
-    handleIsOpenStates: (parent: string, open?: boolean) => void;
     isCreatingNewFolder: boolean;
     setNewFolderNameInputValue: (value: React.SetStateAction<string>) => void;
     newFolderNameInputValue: string;
@@ -27,7 +26,6 @@ const DirectoryList: React.FC<Props> = ({
     handleParentSelect,
     handleChildrenSelect,
     setOpenedFolder,
-    handleIsOpenStates,
     handleContextMenu,
 }) => {
     const directoryStructure = useContext(directoryContext);
@@ -39,13 +37,11 @@ const DirectoryList: React.FC<Props> = ({
                         <div className="pl-1 pt-3 overflow-hidden flex flex-col items-start">
                             <ul className="w-full">
                                 <Collapse
-                                    onClick={handleIsOpenStates}
                                     index={index}
                                     parent={directory.parent}
                                     setIsCreatingNewFolder={setIsCreatingNewFolder}
                                     handleParentSelect={handleParentSelect}
                                     directory={directory}
-                                    handleIsOpenStates={handleIsOpenStates}
                                     isCreatingNewFolder={isCreatingNewFolder}
                                     newFolderNameInputValue={newFolderNameInputValue}
                                     setNewFolderNameInputValue={setNewFolderNameInputValue}
