@@ -11,6 +11,7 @@ import {
     newFolderNameInputValueContext,
     setNewFolderNameInputValueContext,
 } from './Providers/newFolderNameInputValueProvider';
+import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -45,8 +46,9 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
     const { unselectAll } = useContext(handleSelectContext);
     const newFolderNameInputValue = useContext(newFolderNameInputValueContext);
     const setNewFolderNameInputValue = useContext(setNewFolderNameInputValueContext);
+    const isCreatingNewFolder = useContext(isCreatingNewFolderContext);
+    const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
 
-    const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     const [initializedOpenStates, setInitializedOpenStates] = useState<boolean>(false);
     const [isDeletingFolder, setIsDeletingFolder] = useState<boolean>(false);
     const sidebarRef = useRef(null);
@@ -121,18 +123,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
         }
         setIsOpenStates(newStates);
     };
-
-    const getSelectedParentIndex = () => {
-        return Object.keys(isSelected).findIndex((parent) => {
-            return isSelected[parent].parent || isSelected[parent].children.includes(true);
-        });
-    };
-
-    useEffect(() => {
-        if (!isCreatingNewFolder) return;
-        const index = getSelectedParentIndex();
-        handleIsOpenStates(directoryStructure[index]?.parent, true);
-    }, [isCreatingNewFolder]);
 
     const MENU_ID = 'directory';
     const { show } = useContextMenu({
@@ -225,8 +215,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                         </div>
                     </div>
                     <DirectoryList
-                        isCreatingNewFolder={isCreatingNewFolder}
-                        setIsCreatingNewFolder={setIsCreatingNewFolder}
                         setOpenedFolder={setOpenedFolder}
                         handleContextMenu={handleContextMenu}
                     />

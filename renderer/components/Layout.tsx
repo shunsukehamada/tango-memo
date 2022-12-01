@@ -9,6 +9,7 @@ import IsOpenStatesProvider from './SideBar/Providers/IsOpenStatesProvider';
 import HandleIsOpenStatesProvider from './SideBar/Providers/HandleIsOpenStatesProvider';
 import HandleSelectProvider from './SideBar/Providers/HandleSelectProvider';
 import NewFolderInputValue from './SideBar/Providers/HandleSelectProvider';
+import IsCreatingNewFolderProvider from './SideBar/Providers/isCreatingNewFolderProvider';
 
 const Layout = () => {
     // build時は削除
@@ -47,7 +48,9 @@ const Layout = () => {
                                     <HandleIsOpenStatesProvider>
                                         <HandleSelectProvider>
                                             <NewFolderInputValue>
-                                                <SideBar setOpenedFolder={setOpenedFolder} />
+                                                <IsCreatingNewFolderProvider>
+                                                    <SideBar setOpenedFolder={setOpenedFolder} />
+                                                </IsCreatingNewFolderProvider>
                                             </NewFolderInputValue>
                                         </HandleSelectProvider>
                                     </HandleIsOpenStatesProvider>

@@ -3,6 +3,7 @@ import { directoryContext, setDirectoryContext } from './Providers/DirectoryProv
 import { getWordsContext } from './Providers/GetWordsProvider';
 import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
 import { handleSelectContext } from './Providers/HandleSelectProvider';
+import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
 import { isOpenStatesContext } from './Providers/IsOpenStatesProvider';
 import { isSelectedContext } from './Providers/IsSelectedProvider';
 import {
@@ -17,9 +18,7 @@ type Props = {
     // isOpen: boolean;
     index: number;
     parent: string;
-    setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
     directory: DirectoryStructure;
-    isCreatingNewFolder: boolean;
     setOpenedFolder: (
         value: React.SetStateAction<{
             parent: string;
@@ -33,9 +32,7 @@ const Collapse: React.FC<Props> = ({
     // isOpen,
     index,
     parent,
-    setIsCreatingNewFolder,
     directory,
-    isCreatingNewFolder,
     setOpenedFolder,
     handleContextMenu,
 }) => {
@@ -48,6 +45,9 @@ const Collapse: React.FC<Props> = ({
     const { handleChildrenSelect, handleParentSelect } = useContext(handleSelectContext);
     const newFolderNameInputValue = useContext(newFolderNameInputValueContext);
     const setNewFolderNameInputValue = useContext(setNewFolderNameInputValueContext);
+    const isCreatingNewFolder = useContext(isCreatingNewFolderContext);
+    const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
+    
     return (
         <div>
             <div

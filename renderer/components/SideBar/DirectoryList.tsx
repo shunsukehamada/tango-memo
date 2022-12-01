@@ -3,8 +3,6 @@ import Collapse from './Collapse';
 import { directoryContext } from './Providers/DirectoryProvider';
 
 type Props = {
-    setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
-    isCreatingNewFolder: boolean;
     setOpenedFolder: (
         value: React.SetStateAction<{
             parent: string;
@@ -15,8 +13,6 @@ type Props = {
 };
 
 const DirectoryList: React.FC<Props> = ({
-    isCreatingNewFolder,
-    setIsCreatingNewFolder,
     setOpenedFolder,
     handleContextMenu,
 }) => {
@@ -31,9 +27,7 @@ const DirectoryList: React.FC<Props> = ({
                                 <Collapse
                                     index={index}
                                     parent={directory.parent}
-                                    setIsCreatingNewFolder={setIsCreatingNewFolder}
                                     directory={directory}
-                                    isCreatingNewFolder={isCreatingNewFolder}
                                     setOpenedFolder={setOpenedFolder}
                                     handleContextMenu={handleContextMenu}
                                 />
