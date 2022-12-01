@@ -5,6 +5,7 @@ import DirectoryProvider from './SideBar/Providers/DirectoryProvider';
 import GetWordsProvider from './SideBar/Providers/GetWordsProvider';
 import WordsProvider, { setWordsContext, wordsContext } from './List/Providers/WordsProvider';
 import IsSelectedProvider from './SideBar/Providers/IsSelectedProvider';
+import IsOpenStatesProvider from './SideBar/Providers/IsOpenStatesProvider';
 
 const Layout = () => {
     // build時は削除
@@ -39,7 +40,9 @@ const Layout = () => {
                     <DirectoryProvider>
                         <GetWordsProvider>
                             <IsSelectedProvider>
-                                <SideBar setOpenedFolder={setOpenedFolder} />
+                                <IsOpenStatesProvider>
+                                    <SideBar setOpenedFolder={setOpenedFolder} />
+                                </IsOpenStatesProvider>
                             </IsSelectedProvider>
                         </GetWordsProvider>
                     </DirectoryProvider>

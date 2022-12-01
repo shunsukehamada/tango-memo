@@ -4,6 +4,7 @@ import { VscCollapseAll, VscEdit, VscNewFolder, VscTrash } from 'react-icons/vsc
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import DirectoryList from './DirectoryList';
 import { isSelectedContext, setIsSelectedContext } from './Providers/IsSelectedProvider';
+import { isOpenStatesContext, setIsOpenStatesContext } from './Providers/IsOpenStatesProvider';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -32,8 +33,9 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
     const setDirectoryStructure = useContext(setDirectoryContext);
     const isSelected = useContext(isSelectedContext);
     const setIsSelected = useContext(setIsSelectedContext);
+    const isOpenStates = useContext(isOpenStatesContext);
+    const setIsOpenStates = useContext(setIsOpenStatesContext);
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
-    const [isOpenStates, setIsOpenStates] = useState<isOpenStatesType>();
     const [initializedOpenStates, setInitializedOpenStates] = useState<boolean>(false);
     const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
     const [isDeletingFolder, setIsDeletingFolder] = useState<boolean>(false);
@@ -247,9 +249,7 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                         setNewFolderNameInputValue={setNewFolderNameInputValue}
                         handleParentSelect={handleParentSelect}
                         handleChildrenSelect={handleChildrenSelect}
-                        isOpenStates={isOpenStates}
                         handleIsOpenStates={handleIsOpenStates}
-                        setIsOpenStates={setIsOpenStates}
                         setOpenedFolder={setOpenedFolder}
                         handleContextMenu={handleContextMenu}
                     />
