@@ -49,7 +49,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
     const isCreatingNewFolder = useContext(isCreatingNewFolderContext);
     const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
 
-    const [initializedOpenStates, setInitializedOpenStates] = useState<boolean>(false);
     const [isDeletingFolder, setIsDeletingFolder] = useState<boolean>(false);
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
@@ -87,16 +86,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                 }).children.length
             ).fill(false);
             isSelectedObject[parent] = { parent: false, children };
-        }
-        if (!initializedOpenStates) {
-            const newStates: isOpenStatesType = {};
-            [...directoryStructure].map((directory) => {
-                newStates[directory.parent] = false;
-            });
-            setIsOpenStates(newStates);
-            if (directoryStructure.length > 1) {
-                setInitializedOpenStates(true);
-            }
         }
         setIsSelected(isSelectedObject);
     }, [directoryStructure]);
