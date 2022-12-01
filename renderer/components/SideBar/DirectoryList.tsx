@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Collapse from './Collapse';
-import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
+import { directoryContext } from './Providers/DirectoryProvider';
 import { isOpenStatesType, isSelectedType } from './SideBar';
 
 type Props = {
@@ -15,7 +15,6 @@ type Props = {
     isCreatingNewFolder: boolean;
     setNewFolderNameInputValue: (value: React.SetStateAction<string>) => void;
     newFolderNameInputValue: string;
-    getWords: (parentFolder: string, folder: string) => Promise<void>;
     setOpenedFolder: (
         value: React.SetStateAction<{
             parent: string;
@@ -26,7 +25,6 @@ type Props = {
 };
 
 const DirectoryList: React.FC<Props> = ({
-    getWords,
     isCreatingNewFolder,
     setIsCreatingNewFolder,
     newFolderNameInputValue,
@@ -41,7 +39,6 @@ const DirectoryList: React.FC<Props> = ({
     handleContextMenu,
 }) => {
     const directoryStructure = useContext(directoryContext);
-    const setDirectoryStructure = useContext(setDirectoryContext);
     return (
         <div>
             {directoryStructure.map((directory, index) => {
@@ -63,7 +60,6 @@ const DirectoryList: React.FC<Props> = ({
                                     isCreatingNewFolder={isCreatingNewFolder}
                                     newFolderNameInputValue={newFolderNameInputValue}
                                     setNewFolderNameInputValue={setNewFolderNameInputValue}
-                                    getWords={getWords}
                                     setOpenedFolder={setOpenedFolder}
                                     handleChildrenSelect={handleChildrenSelect}
                                     handleContextMenu={handleContextMenu}

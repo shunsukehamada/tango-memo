@@ -1,4 +1,4 @@
-import { Word } from './List';
+import { Word } from './List/List';
 import Modal from './Modal';
 import RegisterForm from './RegisterForm';
 

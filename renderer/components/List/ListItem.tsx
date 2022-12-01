@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Word } from './List';
 import { MdOutlineDragHandle } from 'react-icons/md';
 import { Draggable } from 'react-beautiful-dnd';

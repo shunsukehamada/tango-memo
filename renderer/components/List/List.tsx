@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import ListItem from './ListItem';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { HiOutlineViewList } from 'react-icons/hi';
@@ -8,11 +8,10 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Item, ItemParams, Menu, useContextMenu } from 'react-contexify';
 import 'react-contexify/ReactContexify.css';
 import { VscEdit, VscTrash } from 'react-icons/vsc';
-import EditionModal from './EditionModal';
+import EditionModal from '../EditionModal';
+import { setWordsContext, wordsContext } from './Providers/WordsProvider';
 
 type Props = {
-    items: Word[];
-    setWords: React.Dispatch<React.SetStateAction<Word[]>>;
     openedFolder: {
         parent: string;
         folder: string;
@@ -30,7 +29,10 @@ export type Word = {
 
 type View = 'list' | 'grid';
 
-const List = ({ items, setWords, openedFolder, editItems }: Props) => {
+const List = ({ openedFolder, editItems }: Props) => {
+    const items = useContext(wordsContext);
+    const setWords = useContext(setWordsContext);
+
     const [isHidden, setIsHidden] = useState(false);
     const [view, setView] = useState<View>('list');
     const [isShow, setIsShow] = useState<boolean>(false);

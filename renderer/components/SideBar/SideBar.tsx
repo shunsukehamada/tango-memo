@@ -10,9 +10,6 @@ export type DirectoryStructure = {
 };
 
 type Props = {
-    // directoryStructure: DirectoryStructure[];
-
-    getWords: (parentFolder: string, folder: string) => Promise<void>;
     setOpenedFolder: React.Dispatch<
         React.SetStateAction<{
             parent: string;
@@ -29,7 +26,7 @@ export type isOpenStatesType = {
     [parent: DirectoryStructure['parent']]: boolean;
 };
 
-const SideBar: React.FC<Props> = ({ getWords, setOpenedFolder }: Props) => {
+const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
     // const [directoryStructure, setDirectoryStructure] = useState<DirectoryStructure[]>([]);
     const directoryStructure = useContext(directoryContext);
     const setDirectoryStructure = useContext(setDirectoryContext);
@@ -243,7 +240,6 @@ const SideBar: React.FC<Props> = ({ getWords, setOpenedFolder }: Props) => {
                         </div>
                     </div>
                     <DirectoryList
-                        getWords={getWords}
                         isCreatingNewFolder={isCreatingNewFolder}
                         setIsCreatingNewFolder={setIsCreatingNewFolder}
                         newFolderNameInputValue={newFolderNameInputValue}

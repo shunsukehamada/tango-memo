@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import SideBar from './SideBar/SideBar';
-import List, { Word } from './List';
+import List, { Word } from './List/List';
 import DirectoryProvider from './SideBar/Providers/DirectoryProvider';
+import GetWordsProvider from './SideBar/Providers/GetWordsProvider';
+import WordsProvider, { setWordsContext, wordsContext } from './List/Providers/WordsProvider';
 
 const Layout = () => {
     // build時は削除
     const [openedFolder, setOpenedFolder] = useState<{ parent: string; folder: string } | null>(null);
-    const [words, setWords] = useState<Word[]>([]);
-
-    const getWords = async (parentFolder: string, folder: string): Promise<void> => {
-        const words: Word[] = await global.ipcRenderer.invoke('get-words', parentFolder, folder);
-        setWords(words);
-    };
+    const words = useContext(wordsContext);
+    const setWords = useContext(setWordsContext);
 
     const editListItem = (word: Word, deleted: boolean = false) => {
         if (deleted) {
@@ -34,20 +32,24 @@ const Layout = () => {
     };
 
     return (
-        <div className="flex overflow-y-hidden">
-            <div className="h-screen flex items-center">
-                <DirectoryProvider>
-                    <SideBar getWords={getWords} setOpenedFolder={setOpenedFolder} />
-                </DirectoryProvider>
-            </div>
+        <WordsProvider>
+            <div className="flex overflow-y-hidden">
+                <div className="h-screen flex items-center">
+                    <DirectoryProvider>
+                        <GetWordsProvider>
+                            <SideBar setOpenedFolder={setOpenedFolder} />
+                        </GetWordsProvider>
+                    </DirectoryProvider>
+                </div>
 
-            <div className="flex-1">
-                <List items={words} setWords={setWords} openedFolder={openedFolder} editItems={editListItem} />
+                <div className="flex-1">
+                    <List openedFolder={openedFolder} editItems={editListItem} />
+                </div>
+                {/* <div className="flex-1">
+                    <List items={words} />
+                </div> */}
             </div>
-            {/* <div className="flex-1">
-                <List items={words} />
-            </div> */}
-        </div>
+        </WordsProvider>
     );
 };
 
