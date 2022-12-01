@@ -4,8 +4,6 @@ import { directoryContext } from './Providers/DirectoryProvider';
 
 type Props = {
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
-    handleChildrenSelect: (parentName: string, childIndex: number) => void;
-    handleParentSelect: (parentName: string) => void;
     isCreatingNewFolder: boolean;
     setNewFolderNameInputValue: (value: React.SetStateAction<string>) => void;
     newFolderNameInputValue: string;
@@ -23,8 +21,6 @@ const DirectoryList: React.FC<Props> = ({
     setIsCreatingNewFolder,
     newFolderNameInputValue,
     setNewFolderNameInputValue,
-    handleParentSelect,
-    handleChildrenSelect,
     setOpenedFolder,
     handleContextMenu,
 }) => {
@@ -40,13 +36,11 @@ const DirectoryList: React.FC<Props> = ({
                                     index={index}
                                     parent={directory.parent}
                                     setIsCreatingNewFolder={setIsCreatingNewFolder}
-                                    handleParentSelect={handleParentSelect}
                                     directory={directory}
                                     isCreatingNewFolder={isCreatingNewFolder}
                                     newFolderNameInputValue={newFolderNameInputValue}
                                     setNewFolderNameInputValue={setNewFolderNameInputValue}
                                     setOpenedFolder={setOpenedFolder}
-                                    handleChildrenSelect={handleChildrenSelect}
                                     handleContextMenu={handleContextMenu}
                                 />
                             </ul>

@@ -6,6 +6,7 @@ import DirectoryList from './DirectoryList';
 import { isSelectedContext, setIsSelectedContext } from './Providers/IsSelectedProvider';
 import { isOpenStatesContext, setIsOpenStatesContext } from './Providers/IsOpenStatesProvider';
 import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
+import { handleSelectContext } from './Providers/HandleSelectProvider';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -36,7 +37,8 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
     const setIsSelected = useContext(setIsSelectedContext);
     const isOpenStates = useContext(isOpenStatesContext);
     const setIsOpenStates = useContext(setIsOpenStatesContext);
-    const handleIsOpenStates = useContext(handleIsOpenStatesContext)
+    const handleIsOpenStates = useContext(handleIsOpenStatesContext);
+    const { unselectAll } = useContext(handleSelectContext);
     const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
     const [initializedOpenStates, setInitializedOpenStates] = useState<boolean>(false);
     const [newFolderNameInputValue, setNewFolderNameInputValue] = useState('');
@@ -112,29 +114,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
             newStates[parent] = false;
         }
         setIsOpenStates(newStates);
-    };
-
-    const handleChildrenSelect = (parentName: string, childIndex: number): void => {
-        unselectAll();
-        const newStates: isSelectedType = { ...isSelected };
-        newStates[parentName].children[childIndex] = true;
-        setIsSelected(newStates);
-    };
-
-    const handleParentSelect = (parentName: string) => {
-        unselectAll();
-        const newStates: isSelectedType = { ...isSelected };
-        newStates[parentName].parent = !newStates[parentName].parent;
-        setIsSelected(newStates);
-    };
-
-    const unselectAll = () => {
-        const newStates: isSelectedType = { ...isSelected };
-        for (const parent of Object.keys(isSelected)) {
-            newStates[parent].parent = false;
-            newStates[parent].children = [...isSelected[parent].children].map(() => false);
-        }
-        setIsSelected(newStates);
     };
 
     const getSelectedParentIndex = () => {
@@ -244,8 +223,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                         setIsCreatingNewFolder={setIsCreatingNewFolder}
                         newFolderNameInputValue={newFolderNameInputValue}
                         setNewFolderNameInputValue={setNewFolderNameInputValue}
-                        handleParentSelect={handleParentSelect}
-                        handleChildrenSelect={handleChildrenSelect}
                         setOpenedFolder={setOpenedFolder}
                         handleContextMenu={handleContextMenu}
                     />

@@ -7,6 +7,7 @@ import WordsProvider, { setWordsContext, wordsContext } from './List/Providers/W
 import IsSelectedProvider from './SideBar/Providers/IsSelectedProvider';
 import IsOpenStatesProvider from './SideBar/Providers/IsOpenStatesProvider';
 import HandleIsOpenStatesProvider from './SideBar/Providers/HandleIsOpenStatesProvider';
+import HandleSelectProvider from './SideBar/Providers/HandleSelectProvider';
 
 const Layout = () => {
     // build時は削除
@@ -43,7 +44,9 @@ const Layout = () => {
                             <IsSelectedProvider>
                                 <IsOpenStatesProvider>
                                     <HandleIsOpenStatesProvider>
-                                        <SideBar setOpenedFolder={setOpenedFolder} />
+                                        <HandleSelectProvider>
+                                            <SideBar setOpenedFolder={setOpenedFolder} />
+                                        </HandleSelectProvider>
                                     </HandleIsOpenStatesProvider>
                                 </IsOpenStatesProvider>
                             </IsSelectedProvider>

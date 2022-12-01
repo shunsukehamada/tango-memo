@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
 import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
+import { handleSelectContext } from './Providers/HandleSelectProvider';
 import { isOpenStatesContext } from './Providers/IsOpenStatesProvider';
 import { isSelectedContext } from './Providers/IsSelectedProvider';
 import { DirectoryStructure } from './SideBar';
@@ -13,7 +14,6 @@ type Props = {
     index: number;
     parent: string;
     setIsCreatingNewFolder: (value: React.SetStateAction<boolean>) => void;
-    handleParentSelect: (parentName: string) => void;
     directory: DirectoryStructure;
     isCreatingNewFolder: boolean;
     newFolderNameInputValue: string;
@@ -24,7 +24,6 @@ type Props = {
             folder: string;
         }>
     ) => void;
-    handleChildrenSelect: (parentName: string, childIndex: number) => void;
     handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => void;
 };
 
@@ -33,13 +32,11 @@ const Collapse: React.FC<Props> = ({
     index,
     parent,
     setIsCreatingNewFolder,
-    handleParentSelect,
     directory,
     isCreatingNewFolder,
     newFolderNameInputValue,
     setNewFolderNameInputValue,
     setOpenedFolder,
-    handleChildrenSelect,
     handleContextMenu,
 }) => {
     const directoryStructure = useContext(directoryContext);
@@ -48,6 +45,7 @@ const Collapse: React.FC<Props> = ({
     const isSelected = useContext(isSelectedContext);
     const isOpenStates = useContext(isOpenStatesContext);
     const handleIsOpenStates = useContext(handleIsOpenStatesContext);
+    const { handleChildrenSelect, handleParentSelect } = useContext(handleSelectContext);
     return (
         <div>
             <div
