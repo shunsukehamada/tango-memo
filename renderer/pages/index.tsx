@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { useRouter } from 'next/router';
-import { AnimatePresence,motion, useAnimationControls } from 'framer-motion';
+import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
+import { GetServerSideProps } from 'next';
+import { resetServerContext } from 'react-beautiful-dnd';
 ('next/router');
+
+export const getServerSideProps: GetServerSideProps = async () => {
+    resetServerContext();
+    return { props: {} };
+};
 
 const IndexPage = () => {
     const router = useRouter();
