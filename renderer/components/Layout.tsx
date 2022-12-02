@@ -12,7 +12,6 @@ import NewFolderInputValue from './SideBar/Providers/HandleSelectProvider';
 import IsCreatingNewFolderProvider from './SideBar/Providers/isCreatingNewFolderProvider';
 import HandleContextMenuProvider from './SideBar/Providers/HandleContextMenuProvider';
 import OpenedFolderProvider from './SideBar/Providers/OpenedFolderProvider';
-import EditListItemProvider from './List/Providers/EditListItemProvider';
 
 const Layout = () => {
     return (
@@ -42,9 +41,7 @@ const Layout = () => {
                     </div>
 
                     <div className="flex-1">
-                        <EditListItemProvider>
-                            <List />
-                        </EditListItemProvider>
+                        <List />
                     </div>
                 </div>
             </WordsProvider>
