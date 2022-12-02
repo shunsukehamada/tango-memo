@@ -511,3 +511,32 @@ ipcMain.on('delete-parent-folder', async (_e: IpcMainEvent, { parent }) => {
         deleteChildFolder(db, folderId);
     }
 });
+
+ipcMain.on('change-parent-folder', async (_e: IpcMainEvent, editingFolder: { parent: string }, folder: string) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    db.run('update parent_folders set name = ? where name = ?', [folder, editingFolder.parent], (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+});
+ipcMain.on(
+    'change-child-folder',
+    async (_e: IpcMainEvent, { parent, child }: { parent: string; child: string }, folder: string) => {
+        const db = new sqlite3.Database(
+            isDev
+                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+        );
+        const id = await getFolderId(db, parent, child);
+        db.run('update folders set name = ? where id = ?', [folder, id], (err) => {
+            if (err) {
+                console.error(err);
+            }
+        });
+    }
+);

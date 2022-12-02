@@ -42,9 +42,6 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
     const folderValue = useContext(folderValueContext);
     const setFolderValue = useContext(setFolderValueContext);
 
-    // const changeFolderName = ()=>{
-    //     global.ipcRenderer.send("change-parent-folder", )
-    // }
     const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
         if (folderValue === '') {
@@ -65,6 +62,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                 }
                 return directory;
             });
+            global.ipcRenderer.send('change-parent-folder', editingFolder, folderValue);
             setDirectoryStructure(newStates);
         } else {
             if (
@@ -89,6 +87,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                 }
                 return directory;
             });
+            global.ipcRenderer.send('change-child-folder', editingFolder, folderValue);
             setDirectoryStructure(newStates);
         }
         setEditFolder({ isEditingFolder: false });
