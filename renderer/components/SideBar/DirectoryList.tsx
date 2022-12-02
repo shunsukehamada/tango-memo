@@ -9,12 +9,10 @@ type Props = {
             folder: string;
         }>
     ) => void;
-    handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => void;
 };
 
 const DirectoryList: React.FC<Props> = ({
     setOpenedFolder,
-    handleContextMenu,
 }) => {
     const directoryStructure = useContext(directoryContext);
     return (
@@ -29,7 +27,6 @@ const DirectoryList: React.FC<Props> = ({
                                     parent={directory.parent}
                                     directory={directory}
                                     setOpenedFolder={setOpenedFolder}
-                                    handleContextMenu={handleContextMenu}
                                 />
                             </ul>
                         </div>

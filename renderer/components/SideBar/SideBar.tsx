@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Item, ItemParams, Menu, useContextMenu } from 'react-contexify';
+import { Item, ItemParams, Menu } from 'react-contexify';
 import { VscCollapseAll, VscEdit, VscNewFolder, VscTrash } from 'react-icons/vsc';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import DirectoryList from './DirectoryList';
@@ -113,21 +113,6 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
         setIsOpenStates(newStates);
     };
 
-    const MENU_ID = 'directory';
-    const { show } = useContextMenu({
-        id: MENU_ID,
-    });
-
-    const handleContextMenu = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => {
-        show({
-            event,
-            props: {
-                parent,
-                child,
-            },
-        });
-    };
-
     const deleteFolder = (parent: string, child?: string) => {
         if (!child) {
             const newDirectoryStructure = [...directoryStructure].filter((directory) => directory.parent !== parent);
@@ -143,6 +128,7 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
         });
         setDirectoryStructure(newDirectoryStructure);
     };
+
     const handleItemClick = ({ id, props }: ItemParams<{ parent: string; child?: string }>) => {
         if (id === 'delete') {
             if (confirm(`${props.child ? `${props.parent}/${props.child}` : props.parent}を削除しますか?`)) {
@@ -203,10 +189,7 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                             <VscCollapseAll size={'2em'} />
                         </div>
                     </div>
-                    <DirectoryList
-                        setOpenedFolder={setOpenedFolder}
-                        handleContextMenu={handleContextMenu}
-                    />
+                    <DirectoryList setOpenedFolder={setOpenedFolder} />
 
                     {isCreatingNewFolder &&
                         Object.keys(isSelected).every((parent) => {
@@ -266,7 +249,7 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                 <div className="w-1 h-full group-hover:bg-blue-500 mx-auto"></div>
             </div>
             <div className="flex-1 flex flex-col bg-white h-full max-h-full z-10"></div>
-            <Menu id={MENU_ID}>
+            <Menu id={'directory'}>
                 <Item id="delete" onClick={handleItemClick}>
                     <VscTrash />
                     削除

@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
+import { handleContextMenuContext } from './Providers/HandleContextMenuProvider';
 import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
 import { handleSelectContext } from './Providers/HandleSelectProvider';
 import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
@@ -25,7 +26,6 @@ type Props = {
             folder: string;
         }>
     ) => void;
-    handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => void;
 };
 
 const Collapse: React.FC<Props> = ({
@@ -34,7 +34,6 @@ const Collapse: React.FC<Props> = ({
     parent,
     directory,
     setOpenedFolder,
-    handleContextMenu,
 }) => {
     const directoryStructure = useContext(directoryContext);
     const setDirectoryStructure = useContext(setDirectoryContext);
@@ -47,6 +46,7 @@ const Collapse: React.FC<Props> = ({
     const setNewFolderNameInputValue = useContext(setNewFolderNameInputValueContext);
     const isCreatingNewFolder = useContext(isCreatingNewFolderContext);
     const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
+    const handleContextMenu = useContext(handleContextMenuContext);
     
     return (
         <div>
