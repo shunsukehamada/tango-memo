@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import SideBar from './SideBar/SideBar';
 import List, { Word } from './List/List';
 import DirectoryProvider from './SideBar/Providers/DirectoryProvider';
@@ -11,10 +11,9 @@ import HandleSelectProvider from './SideBar/Providers/HandleSelectProvider';
 import NewFolderInputValue from './SideBar/Providers/HandleSelectProvider';
 import IsCreatingNewFolderProvider from './SideBar/Providers/isCreatingNewFolderProvider';
 import HandleContextMenuProvider from './SideBar/Providers/HandleContextMenuProvider';
+import OpenedFolderProvider from './SideBar/Providers/OpenedFolderProvider';
 
 const Layout = () => {
-    // build時は削除
-    const [openedFolder, setOpenedFolder] = useState<{ parent: string; folder: string } | null>(null);
     const words = useContext(wordsContext);
     const setWords = useContext(setWordsContext);
 
@@ -39,38 +38,37 @@ const Layout = () => {
     };
 
     return (
-        <WordsProvider>
-            <div className="flex overflow-y-hidden">
-                <div className="h-screen flex items-center">
-                    <DirectoryProvider>
-                        <GetWordsProvider>
-                            <IsSelectedProvider>
-                                <IsOpenStatesProvider>
-                                    <HandleIsOpenStatesProvider>
-                                        <HandleSelectProvider>
-                                            <NewFolderInputValue>
-                                                <IsCreatingNewFolderProvider>
-                                                    <HandleContextMenuProvider>
-                                                        <SideBar setOpenedFolder={setOpenedFolder} />
-                                                    </HandleContextMenuProvider>
-                                                </IsCreatingNewFolderProvider>
-                                            </NewFolderInputValue>
-                                        </HandleSelectProvider>
-                                    </HandleIsOpenStatesProvider>
-                                </IsOpenStatesProvider>
-                            </IsSelectedProvider>
-                        </GetWordsProvider>
-                    </DirectoryProvider>
-                </div>
+        <OpenedFolderProvider>
+            <WordsProvider>
+                <div className="flex overflow-y-hidden">
+                    <div className="h-screen flex items-center">
+                        <DirectoryProvider>
+                            <GetWordsProvider>
+                                <IsSelectedProvider>
+                                    <IsOpenStatesProvider>
+                                        <HandleIsOpenStatesProvider>
+                                            <HandleSelectProvider>
+                                                <NewFolderInputValue>
+                                                    <IsCreatingNewFolderProvider>
+                                                        <HandleContextMenuProvider>
+                                                            <SideBar />
+                                                        </HandleContextMenuProvider>
+                                                    </IsCreatingNewFolderProvider>
+                                                </NewFolderInputValue>
+                                            </HandleSelectProvider>
+                                        </HandleIsOpenStatesProvider>
+                                    </IsOpenStatesProvider>
+                                </IsSelectedProvider>
+                            </GetWordsProvider>
+                        </DirectoryProvider>
+                    </div>
 
-                <div className="flex-1">
-                    <List openedFolder={openedFolder} editItems={editListItem} />
+                    <div className="flex-1">
+                        <List editItems={editListItem} />
+                    </div>
                 </div>
-                {/* <div className="flex-1">
-                    <List items={words} />
-                </div> */}
-            </div>
-        </WordsProvider>
+            </WordsProvider>
+        </OpenedFolderProvider>
     );
 };
 

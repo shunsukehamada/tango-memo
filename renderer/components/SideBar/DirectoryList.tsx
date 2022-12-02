@@ -2,18 +2,7 @@ import React, { useContext } from 'react';
 import Collapse from './Collapse';
 import { directoryContext } from './Providers/DirectoryProvider';
 
-type Props = {
-    setOpenedFolder: (
-        value: React.SetStateAction<{
-            parent: string;
-            folder: string;
-        }>
-    ) => void;
-};
-
-const DirectoryList: React.FC<Props> = ({
-    setOpenedFolder,
-}) => {
+const DirectoryList: React.FC = () => {
     const directoryStructure = useContext(directoryContext);
     return (
         <div>
@@ -22,12 +11,7 @@ const DirectoryList: React.FC<Props> = ({
                     <div key={directory.parent} className="w-full">
                         <div className="pl-1 pt-3 overflow-hidden flex flex-col items-start">
                             <ul className="w-full">
-                                <Collapse
-                                    index={index}
-                                    parent={directory.parent}
-                                    directory={directory}
-                                    setOpenedFolder={setOpenedFolder}
-                                />
+                                <Collapse index={index} parent={directory.parent} directory={directory} />
                             </ul>
                         </div>
                     </div>

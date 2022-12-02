@@ -11,30 +11,16 @@ import {
     newFolderNameInputValueContext,
     setNewFolderNameInputValueContext,
 } from './Providers/newFolderNameInputValueProvider';
+import { setOpenedFolderContext } from './Providers/OpenedFolderProvider';
 import { DirectoryStructure } from './SideBar';
 
 type Props = {
-    // summary: ReactNode;
-    // details: ReactNode;
-    // isOpen: boolean;
     index: number;
     parent: string;
     directory: DirectoryStructure;
-    setOpenedFolder: (
-        value: React.SetStateAction<{
-            parent: string;
-            folder: string;
-        }>
-    ) => void;
 };
 
-const Collapse: React.FC<Props> = ({
-    // isOpen,
-    index,
-    parent,
-    directory,
-    setOpenedFolder,
-}) => {
+const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
     const directoryStructure = useContext(directoryContext);
     const setDirectoryStructure = useContext(setDirectoryContext);
     const getWords = useContext(getWordsContext);
@@ -47,7 +33,8 @@ const Collapse: React.FC<Props> = ({
     const isCreatingNewFolder = useContext(isCreatingNewFolderContext);
     const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
     const handleContextMenu = useContext(handleContextMenuContext);
-    
+    const setOpenedFolder = useContext(setOpenedFolderContext);
+
     return (
         <div>
             <div

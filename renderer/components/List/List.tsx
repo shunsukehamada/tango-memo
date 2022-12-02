@@ -10,12 +10,9 @@ import 'react-contexify/ReactContexify.css';
 import { VscEdit, VscTrash } from 'react-icons/vsc';
 import EditionModal from '../EditionModal';
 import { setWordsContext, wordsContext } from './Providers/WordsProvider';
+import { openedFolderContext } from '../SideBar/Providers/OpenedFolderProvider';
 
 type Props = {
-    openedFolder: {
-        parent: string;
-        folder: string;
-    };
     editItems: (word: Word, deleted?: boolean) => void;
 };
 
@@ -29,9 +26,10 @@ export type Word = {
 
 type View = 'list' | 'grid';
 
-const List = ({ openedFolder, editItems }: Props) => {
+const List: React.FC<Props> = ({ editItems }) => {
     const items = useContext(wordsContext);
     const setWords = useContext(setWordsContext);
+    const openedFolder = useContext(openedFolderContext);
 
     const [isHidden, setIsHidden] = useState(false);
     const [view, setView] = useState<View>('list');

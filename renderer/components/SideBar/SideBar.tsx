@@ -18,15 +18,6 @@ export type DirectoryStructure = {
     readonly children: string[];
 };
 
-type Props = {
-    setOpenedFolder: React.Dispatch<
-        React.SetStateAction<{
-            parent: string;
-            folder: string;
-        }>
-    >;
-};
-
 export type isSelectedType = {
     [parent: DirectoryStructure['parent']]: { parent: boolean; children: boolean[] };
 };
@@ -35,7 +26,7 @@ export type isOpenStatesType = {
     [parent: DirectoryStructure['parent']]: boolean;
 };
 
-const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
+const SideBar: React.FC = () => {
     const directoryStructure = useContext(directoryContext);
     const setDirectoryStructure = useContext(setDirectoryContext);
     const isSelected = useContext(isSelectedContext);
@@ -189,7 +180,7 @@ const SideBar: React.FC<Props> = ({ setOpenedFolder }: Props) => {
                             <VscCollapseAll size={'2em'} />
                         </div>
                     </div>
-                    <DirectoryList setOpenedFolder={setOpenedFolder} />
+                    <DirectoryList />
 
                     {isCreatingNewFolder &&
                         Object.keys(isSelected).every((parent) => {
