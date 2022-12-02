@@ -12,6 +12,8 @@ import NewFolderInputValue from './SideBar/Providers/HandleSelectProvider';
 import IsCreatingNewFolderProvider from './SideBar/Providers/isCreatingNewFolderProvider';
 import HandleContextMenuProvider from './SideBar/Providers/HandleContextMenuProvider';
 import OpenedFolderProvider from './SideBar/Providers/OpenedFolderProvider';
+import EditFolderProvider from './SideBar/Providers/EditFolderValueProvider';
+import HandleEditFolderProvider from './SideBar/Providers/HandleEditFolderProvider';
 
 const Layout = () => {
     return (
@@ -28,7 +30,11 @@ const Layout = () => {
                                                 <NewFolderInputValue>
                                                     <IsCreatingNewFolderProvider>
                                                         <HandleContextMenuProvider>
-                                                            <SideBar />
+                                                            <EditFolderProvider>
+                                                                <HandleEditFolderProvider>
+                                                                    <SideBar />
+                                                                </HandleEditFolderProvider>
+                                                            </EditFolderProvider>
                                                         </HandleContextMenuProvider>
                                                     </IsCreatingNewFolderProvider>
                                                 </NewFolderInputValue>

@@ -12,6 +12,7 @@ import {
     setNewFolderNameInputValueContext,
 } from './Providers/newFolderNameInputValueProvider';
 import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
+import { handleEditFolderContext, setEditFolderContext } from './Providers/HandleEditFolderProvider';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -39,6 +40,8 @@ const SideBar: React.FC = () => {
     const setNewFolderNameInputValue = useContext(setNewFolderNameInputValueContext);
     const isCreatingNewFolder = useContext(isCreatingNewFolderContext);
     const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
+    const setEditFolder = useContext(setEditFolderContext);
+    const handleEditFolder = useContext(handleEditFolderContext);
 
     const [isDeletingFolder, setIsDeletingFolder] = useState<boolean>(false);
     const sidebarRef = useRef(null);
@@ -132,7 +135,7 @@ const SideBar: React.FC = () => {
             return;
         }
         if (id === 'edit') {
-            console.log(props);
+            handleEditFolder(props);
             return;
         }
     };
@@ -150,6 +153,7 @@ const SideBar: React.FC = () => {
                 onClick={() => {
                     unselectAll();
                     setIsCreatingNewFolder(false);
+                    setEditFolder({ isEditingFolder: false });
                 }}
             >
                 <div className="flex-1 overflow-hidden">
@@ -158,6 +162,7 @@ const SideBar: React.FC = () => {
                             className="px-2 cursor-pointer"
                             onClick={(e) => {
                                 e.stopPropagation();
+                                setEditFolder({ isEditingFolder: false });
                                 setIsCreatingNewFolder(true);
                                 const selectedIndex = Object.keys(isSelected)
                                     .map((parent) => {
@@ -176,7 +181,14 @@ const SideBar: React.FC = () => {
                         >
                             <VscNewFolder size={'2em'} />
                         </div>
-                        <div className="px-2 cursor-pointer" onClick={collapseAll}>
+
+                        <div
+                            className="px-2 cursor-pointer"
+                            onClick={() => {
+                                collapseAll();
+                                setEditFolder({ isEditingFolder: false });
+                            }}
+                        >
                             <VscCollapseAll size={'2em'} />
                         </div>
                     </div>

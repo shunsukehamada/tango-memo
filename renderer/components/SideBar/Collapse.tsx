@@ -1,7 +1,9 @@
 import { useContext } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
+import { folderValueContext, setFolderValueContext } from './Providers/EditFolderValueProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
 import { handleContextMenuContext } from './Providers/HandleContextMenuProvider';
+import { editFolderContext, setEditFolderContext } from './Providers/HandleEditFolderProvider';
 import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
 import { handleSelectContext } from './Providers/HandleSelectProvider';
 import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
@@ -14,6 +16,7 @@ import {
 import { setOpenedFolderContext } from './Providers/OpenedFolderProvider';
 import { DirectoryStructure } from './SideBar';
 
+// TODO: directoryを削除
 type Props = {
     index: number;
     parent: string;
@@ -34,6 +37,10 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
     const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
     const handleContextMenu = useContext(handleContextMenuContext);
     const setOpenedFolder = useContext(setOpenedFolderContext);
+    const { isEditingFolder, editingFolder } = useContext(editFolderContext);
+    const setEditFolder = useContext(setEditFolderContext);
+    const folderValue = useContext(folderValueContext);
+    const setFolderValue = useContext(setFolderValueContext);
 
     return (
         <div>
@@ -41,9 +48,11 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                 onClick={(e) => {
                     e.stopPropagation();
                     handleIsOpenStates(parent);
+                    setEditFolder({ isEditingFolder: false });
                 }}
                 className="w-full"
                 onContextMenu={(e) => {
+                    if (isEditingFolder && !editingFolder.child && editingFolder.parent === parent) return;
                     handleContextMenu(e, parent);
                 }}
             >
@@ -64,9 +73,34 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                             : null
                     }
                 >
-                    <li className="overflow-hidden ml-1">
-                        <span className="text-xl font-bold cursor-pointer select-none">{directory?.parent}</span>
-                    </li>
+                    {isEditingFolder && !editingFolder.child && editingFolder.parent === parent ? (
+                        <li className="overflow-hidden pl-1 w-full">
+                            <div className="border-2 border-solid border-blue-400 rounded-md">
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                    }}
+                                >
+                                    <input
+                                        type="text"
+                                        className="w-full text-xl font-bold outline-none"
+                                        style={{ background: 'rgba(0, 0, 0, 0)' }}
+                                        value={folderValue}
+                                        onChange={(e) => {
+                                            setFolderValue(e.target.value);
+                                        }}
+                                    />
+                                </form>
+                            </div>
+                        </li>
+                    ) : (
+                        <li className="overflow-hidden pl-1">
+                            <span className="text-xl font-bold cursor-pointer select-none">{directory?.parent}</span>
+                        </li>
+                    )}
                 </div>
             </div>
             {isOpenStates && isOpenStates[parent] && (
@@ -80,6 +114,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setIsCreatingNewFolder(false);
+                                        setEditFolder({ isEditingFolder: false });
                                     }}
                                 >
                                     <form
@@ -127,8 +162,10 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                             folder: child,
                                         });
                                         handleChildrenSelect(directory?.parent, index);
+                                        setEditFolder({ isEditingFolder: false });
                                     }}
                                     onContextMenu={(e) => {
+                                        if (isEditingFolder && editingFolder.child === child) return;
                                         handleContextMenu(e, parent, child);
                                     }}
                                     style={
@@ -139,9 +176,36 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                             : null
                                     }
                                 >
-                                    <li className="ml-1  cursor-pointer">
-                                        <span className="text-lg inline-block whitespace-nowrap">{child}</span>
-                                    </li>
+                                    {isEditingFolder &&
+                                    editingFolder.child === child &&
+                                    editingFolder.parent === parent ? (
+                                        <li className="pl-1  cursor-pointer w-full">
+                                            <div className="border-2 border-solid border-blue-400 rounded-md">
+                                                <form
+                                                    onSubmit={(e) => {
+                                                        e.preventDefault();
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="text"
+                                                        className="w-full text-lg outline-none"
+                                                        style={{ background: 'rgba(0, 0, 0, 0)' }}
+                                                        value={folderValue}
+                                                        onChange={(e) => {
+                                                            setFolderValue(e.target.value);
+                                                        }}
+                                                    />
+                                                </form>
+                                            </div>
+                                        </li>
+                                    ) : (
+                                        <li className="ml-1  cursor-pointer">
+                                            <span className="text-lg inline-block whitespace-nowrap">{child}</span>
+                                        </li>
+                                    )}
                                 </div>
                             );
                         })}
