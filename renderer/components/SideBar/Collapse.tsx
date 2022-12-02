@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from 'react';
+import { FormEvent, useContext, useEffect, useRef } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import { folderValueContext, setFolderValueContext } from './Providers/EditFolderValueProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
@@ -42,9 +42,45 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
     const folderValue = useContext(folderValueContext);
     const setFolderValue = useContext(setFolderValueContext);
 
+    const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+        e.preventDefault();
+        if (
+            ref.current?.value === '' ||
+            [...directoryStructure].map((directory) => directory.parent).includes(ref.current?.value)
+        ) {
+            return;
+        }
+        if (!editingFolder.child) {
+            const newStates = [...directoryStructure].map((directory) => {
+                if (directory.parent === editingFolder.parent) {
+                    return { ...directory, parent: folderValue };
+                }
+                return directory;
+            });
+            setDirectoryStructure(newStates);
+        } else {
+            const newStates = [...directoryStructure].map((directory) => {
+                if (directory.parent === editingFolder.parent) {
+                    return {
+                        ...directory,
+                        children: directory.children.map((child) => {
+                            if (child === editingFolder.child) {
+                                return folderValue;
+                            }
+                            return child;
+                        }),
+                    };
+                }
+                return directory;
+            });
+            setDirectoryStructure(newStates);
+        }
+        setEditFolder({ isEditingFolder: false });
+    };
     const ref = useRef<HTMLInputElement>();
     useEffect(() => {
         ref.current?.select();
+        ref.current?.focus();
     }, [editingFolder]);
     return (
         <div>
@@ -81,9 +117,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                         <li className="overflow-hidden pl-1 w-full">
                             <div className="border-2 border-solid border-blue-400 rounded-md">
                                 <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                    }}
+                                    onSubmit={handleSubmit}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                     }}
@@ -187,9 +221,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                         <li className="pl-1  cursor-pointer w-full">
                                             <div className="border-2 border-solid border-blue-400 rounded-md">
                                                 <form
-                                                    onSubmit={(e) => {
-                                                        e.preventDefault();
-                                                    }}
+                                                    onSubmit={handleSubmit}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                     }}
