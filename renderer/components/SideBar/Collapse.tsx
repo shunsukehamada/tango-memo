@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import { folderValueContext, setFolderValueContext } from './Providers/EditFolderValueProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
@@ -42,6 +42,10 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
     const folderValue = useContext(folderValueContext);
     const setFolderValue = useContext(setFolderValueContext);
 
+    const ref = useRef<HTMLInputElement>();
+    useEffect(() => {
+        ref.current?.select();
+    }, [editingFolder]);
     return (
         <div>
             <div
@@ -89,6 +93,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                         className="w-full text-xl font-bold outline-none"
                                         style={{ background: 'rgba(0, 0, 0, 0)' }}
                                         value={folderValue}
+                                        ref={ref}
                                         onChange={(e) => {
                                             setFolderValue(e.target.value);
                                         }}
@@ -194,6 +199,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                                         className="w-full text-lg outline-none"
                                                         style={{ background: 'rgba(0, 0, 0, 0)' }}
                                                         value={folderValue}
+                                                        ref={ref}
                                                         onChange={(e) => {
                                                             setFolderValue(e.target.value);
                                                         }}
