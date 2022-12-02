@@ -8,7 +8,7 @@ import IsSelectedProvider from './SideBar/Providers/IsSelectedProvider';
 import IsOpenStatesProvider from './SideBar/Providers/IsOpenStatesProvider';
 import HandleIsOpenStatesProvider from './SideBar/Providers/HandleIsOpenStatesProvider';
 import HandleSelectProvider from './SideBar/Providers/HandleSelectProvider';
-import NewFolderInputValue from './SideBar/Providers/HandleSelectProvider';
+import NewFolderNameInputValueProvider from './SideBar/Providers/NewFolderNameInputValueProvider';
 import IsCreatingNewFolderProvider from './SideBar/Providers/isCreatingNewFolderProvider';
 import HandleContextMenuProvider from './SideBar/Providers/HandleContextMenuProvider';
 import OpenedFolderProvider from './SideBar/Providers/OpenedFolderProvider';
@@ -27,7 +27,7 @@ const Layout = () => {
                                     <IsOpenStatesProvider>
                                         <HandleIsOpenStatesProvider>
                                             <HandleSelectProvider>
-                                                <NewFolderInputValue>
+                                                <NewFolderNameInputValueProvider>
                                                     <IsCreatingNewFolderProvider>
                                                         <HandleContextMenuProvider>
                                                             <EditFolderProvider>
@@ -37,7 +37,7 @@ const Layout = () => {
                                                             </EditFolderProvider>
                                                         </HandleContextMenuProvider>
                                                     </IsCreatingNewFolderProvider>
-                                                </NewFolderInputValue>
+                                                </NewFolderNameInputValueProvider>
                                             </HandleSelectProvider>
                                         </HandleIsOpenStatesProvider>
                                     </IsOpenStatesProvider>

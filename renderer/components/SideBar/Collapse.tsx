@@ -12,7 +12,7 @@ import { isSelectedContext } from './Providers/IsSelectedProvider';
 import {
     newFolderNameInputValueContext,
     setNewFolderNameInputValueContext,
-} from './Providers/newFolderNameInputValueProvider';
+} from './Providers/NewFolderNameInputValueProvider';
 import { setOpenedFolderContext } from './Providers/OpenedFolderProvider';
 import { DirectoryStructure } from './SideBar';
 
@@ -194,9 +194,9 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                     >
                                         <input
                                             type="text"
-                                            defaultValue={newFolderNameInputValue}
+                                            value={newFolderNameInputValue}
                                             onChange={(event) => setNewFolderNameInputValue(event.target.value)}
-                                            className="border-2 border-solid border-gray-400 ml-1"
+                                            className="border-2 border-solid border-gray-400 ml-1 text-lg"
                                             autoFocus={true}
                                         />
                                     </form>

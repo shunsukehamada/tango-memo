@@ -10,7 +10,7 @@ import { handleSelectContext } from './Providers/HandleSelectProvider';
 import {
     newFolderNameInputValueContext,
     setNewFolderNameInputValueContext,
-} from './Providers/newFolderNameInputValueProvider';
+} from './Providers/NewFolderNameInputValueProvider';
 import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
 import { handleEditFolderContext, setEditFolderContext } from './Providers/HandleEditFolderProvider';
 
@@ -228,9 +228,9 @@ const SideBar: React.FC = () => {
                                 >
                                     <input
                                         type="text"
-                                        defaultValue={newFolderNameInputValue}
+                                        value={newFolderNameInputValue}
                                         onChange={(event) => setNewFolderNameInputValue(event.target.value)}
-                                        className="w-full border-2 border-solid border-gray-400"
+                                        className="w-full border-2 border-solid border-gray-400 text-xl font-bold"
                                         autoFocus={true}
                                     />
                                 </form>
