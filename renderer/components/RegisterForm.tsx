@@ -36,7 +36,6 @@ type Props = {
 };
 
 const RegisterForm: React.FC<Props> = ({ word, close }) => {
-    console.log('registerForm');
     const editItems = useContext(editListItemContext);
     const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
     const [defaultFolder, setDefaultFolder] = useState<Folder>();

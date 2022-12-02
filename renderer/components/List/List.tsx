@@ -23,7 +23,6 @@ export type Word = {
 type View = 'list' | 'grid';
 
 const List: React.FC = () => {
-    console.log('list');
     const items = useContext(wordsContext);
     const setWords = useContext(setWordsContext);
     const openedFolder = useContext(openedFolderContext);

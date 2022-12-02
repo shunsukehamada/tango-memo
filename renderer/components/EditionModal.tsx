@@ -9,7 +9,6 @@ type Props = {
     close: () => void;
 };
 const EditionModal: React.FC<Props> = ({ word, isShow, close }) => {
-    console.log('editionModal');
     return (
         <>
             <Modal isShow={isShow} close={close}>
