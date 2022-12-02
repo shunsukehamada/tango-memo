@@ -14,16 +14,13 @@ import {
     setNewFolderNameInputValueContext,
 } from './Providers/NewFolderNameInputValueProvider';
 import { setOpenedFolderContext } from './Providers/OpenedFolderProvider';
-import { DirectoryStructure } from './SideBar';
 
-// TODO: directoryを削除
 type Props = {
     index: number;
     parent: string;
-    directory: DirectoryStructure;
 };
 
-const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
+const Collapse: React.FC<Props> = ({ index, parent }) => {
     const directoryStructure = useContext(directoryContext);
     const setDirectoryStructure = useContext(setDirectoryContext);
     const getWords = useContext(getWordsContext);
@@ -117,11 +114,11 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                     }`}
                     onClick={() => {
                         setIsCreatingNewFolder(false);
-                        handleParentSelect(directory?.parent);
+                        handleParentSelect(parent);
                         handleIsOpenStates(parent, true);
                     }}
                     style={
-                        isSelected[directory?.parent]?.parent
+                        isSelected[parent]?.parent
                             ? {
                                   backgroundColor: 'rgba(100, 100, 100, 0.3)',
                               }
@@ -152,7 +149,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                         </li>
                     ) : (
                         <li className="overflow-hidden pl-1">
-                            <span className="text-xl font-bold cursor-pointer select-none">{directory?.parent}</span>
+                            <span className="text-xl font-bold cursor-pointer select-none">{parent}</span>
                         </li>
                     )}
                 </div>
@@ -161,8 +158,7 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                 <div>
                     <ul className="overflow-hidden">
                         {isCreatingNewFolder &&
-                            (isSelected[directory?.parent].children.includes(true) ||
-                                isSelected[directory?.parent]?.parent) && (
+                            (isSelected[parent].children.includes(true) || isSelected[parent]?.parent) && (
                                 <div
                                     className="ml-4 my-1 flex before:content-['>']"
                                     onClick={(e) => {
@@ -202,66 +198,68 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
                                     </form>
                                 </div>
                             )}
-                        {directory?.children.map((child, index) => {
-                            return (
-                                <div
-                                    key={child}
-                                    className="pl-4 my-1 flex before:content-['>']"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsCreatingNewFolder(false);
-                                        getWords(directory?.parent, child);
-                                        setOpenedFolder({
-                                            parent: directory?.parent,
-                                            folder: child,
-                                        });
-                                        handleChildrenSelect(directory?.parent, index);
-                                        setEditFolder({ isEditingFolder: false });
-                                    }}
-                                    onContextMenu={(e) => {
-                                        if (isEditingFolder && editingFolder.child === child) return;
-                                        handleContextMenu(e, parent, child);
-                                    }}
-                                    style={
-                                        isSelected[directory?.parent]?.children[index]
-                                            ? {
-                                                  backgroundColor: 'rgba(100, 100, 100, 0.3)',
-                                              }
-                                            : null
-                                    }
-                                >
-                                    {isEditingFolder &&
-                                    editingFolder.child === child &&
-                                    editingFolder.parent === parent ? (
-                                        <li className="pl-1  cursor-pointer w-full">
-                                            <div className="border-2 border-solid border-blue-400 rounded-md">
-                                                <form
-                                                    onSubmit={handleSubmit}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                    }}
-                                                >
-                                                    <input
-                                                        type="text"
-                                                        className="w-full text-lg outline-none"
-                                                        style={{ background: 'rgba(0, 0, 0, 0)' }}
-                                                        value={folderValue}
-                                                        ref={ref}
-                                                        onChange={(e) => {
-                                                            setFolderValue(e.target.value);
+                        {directoryStructure
+                            .find((directory) => directory.parent === parent)
+                            .children.map((child, index) => {
+                                return (
+                                    <div
+                                        key={child}
+                                        className="pl-4 my-1 flex before:content-['>']"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsCreatingNewFolder(false);
+                                            getWords(parent, child);
+                                            setOpenedFolder({
+                                                parent: parent,
+                                                folder: child,
+                                            });
+                                            handleChildrenSelect(parent, index);
+                                            setEditFolder({ isEditingFolder: false });
+                                        }}
+                                        onContextMenu={(e) => {
+                                            if (isEditingFolder && editingFolder.child === child) return;
+                                            handleContextMenu(e, parent, child);
+                                        }}
+                                        style={
+                                            isSelected[parent]?.children[index]
+                                                ? {
+                                                      backgroundColor: 'rgba(100, 100, 100, 0.3)',
+                                                  }
+                                                : null
+                                        }
+                                    >
+                                        {isEditingFolder &&
+                                        editingFolder.child === child &&
+                                        editingFolder.parent === parent ? (
+                                            <li className="pl-1  cursor-pointer w-full">
+                                                <div className="border-2 border-solid border-blue-400 rounded-md">
+                                                    <form
+                                                        onSubmit={handleSubmit}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                         }}
-                                                    />
-                                                </form>
-                                            </div>
-                                        </li>
-                                    ) : (
-                                        <li className="ml-1  cursor-pointer">
-                                            <span className="text-lg inline-block whitespace-nowrap">{child}</span>
-                                        </li>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                                    >
+                                                        <input
+                                                            type="text"
+                                                            className="w-full text-lg outline-none"
+                                                            style={{ background: 'rgba(0, 0, 0, 0)' }}
+                                                            value={folderValue}
+                                                            ref={ref}
+                                                            onChange={(e) => {
+                                                                setFolderValue(e.target.value);
+                                                            }}
+                                                        />
+                                                    </form>
+                                                </div>
+                                            </li>
+                                        ) : (
+                                            <li className="ml-1  cursor-pointer">
+                                                <span className="text-lg inline-block whitespace-nowrap">{child}</span>
+                                            </li>
+                                        )}
+                                    </div>
+                                );
+                            })}
                     </ul>
                 </div>
             )}

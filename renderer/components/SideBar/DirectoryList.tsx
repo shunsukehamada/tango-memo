@@ -11,7 +11,7 @@ const DirectoryList: React.FC = () => {
                     <div key={directory.parent} className="w-full">
                         <div className="pl-1 pt-3 overflow-hidden flex flex-col items-start">
                             <ul className="w-full">
-                                <Collapse index={index} parent={directory.parent} directory={directory} />
+                                <Collapse index={index} parent={directory.parent} />
                             </ul>
                         </div>
                     </div>
