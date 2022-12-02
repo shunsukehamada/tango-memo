@@ -42,15 +42,23 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
     const folderValue = useContext(folderValueContext);
     const setFolderValue = useContext(setFolderValueContext);
 
+    // const changeFolderName = ()=>{
+    //     global.ipcRenderer.send("change-parent-folder", )
+    // }
     const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
         e.preventDefault();
-        if (
-            ref.current?.value === '' ||
-            [...directoryStructure].map((directory) => directory.parent).includes(ref.current?.value)
-        ) {
+        if (folderValue === '') {
             return;
         }
         if (!editingFolder.child) {
+            if (
+                [...directoryStructure]
+                    .map((directory) => directory.parent)
+                    .filter((parent) => parent !== editingFolder.parent)
+                    .includes(folderValue)
+            ) {
+                return;
+            }
             const newStates = [...directoryStructure].map((directory) => {
                 if (directory.parent === editingFolder.parent) {
                     return { ...directory, parent: folderValue };
@@ -59,6 +67,14 @@ const Collapse: React.FC<Props> = ({ index, parent, directory }) => {
             });
             setDirectoryStructure(newStates);
         } else {
+            if (
+                [...directoryStructure]
+                    .find((directory) => directory.parent === editingFolder.parent)
+                    .children.filter((child) => child !== editingFolder.child)
+                    .includes(folderValue)
+            ) {
+                return;
+            }
             const newStates = [...directoryStructure].map((directory) => {
                 if (directory.parent === editingFolder.parent) {
                     return {
