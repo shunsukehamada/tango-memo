@@ -6,13 +6,13 @@ type Props = {
     word: Word;
     isShow: boolean;
     close: () => void;
-    editItems: (word: Word, deleted?: boolean) => void;
 };
-const EditionModal: React.FC<Props> = ({ word, isShow, close, editItems }) => {
+const EditionModal: React.FC<Props> = ({ word, isShow, close }) => {
+    console.log('editionModal');
     return (
         <>
             <Modal isShow={isShow} close={close}>
-                <RegisterForm word={word} close={close} editItems={editItems} />
+                <RegisterForm word={word} close={close} />
             </Modal>
         </>
     );

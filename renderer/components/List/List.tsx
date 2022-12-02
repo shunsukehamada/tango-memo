@@ -12,10 +12,6 @@ import EditionModal from '../EditionModal';
 import { setWordsContext, wordsContext } from './Providers/WordsProvider';
 import { openedFolderContext } from '../SideBar/Providers/OpenedFolderProvider';
 
-type Props = {
-    editItems: (word: Word, deleted?: boolean) => void;
-};
-
 export type Word = {
     id: number;
     english: string;
@@ -26,7 +22,8 @@ export type Word = {
 
 type View = 'list' | 'grid';
 
-const List: React.FC<Props> = ({ editItems }) => {
+const List: React.FC = () => {
+    console.log('list');
     const items = useContext(wordsContext);
     const setWords = useContext(setWordsContext);
     const openedFolder = useContext(openedFolderContext);
@@ -90,7 +87,6 @@ const List: React.FC<Props> = ({ editItems }) => {
                 close={() => {
                     setIsShow(false);
                 }}
-                editItems={editItems}
             />
             <div className="flex h-full">
                 <div className="flex-1">

@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { RiPencilFill } from 'react-icons/ri';
 import Select from 'react-select';
 import { Word } from './List/List';
+import { editListItemContext } from './List/Providers/EditListItemProvider';
 import { DirectoryStructure } from './SideBar/SideBar';
 
 type Inputs = {
@@ -32,10 +33,11 @@ type PoSs = {
 type Props = {
     word: Word;
     close: () => void;
-    editItems: (word: Word, deleted?: boolean) => void;
 };
 
-const RegisterForm: React.FC<Props> = ({ word, close, editItems }) => {
+const RegisterForm: React.FC<Props> = ({ word, close }) => {
+    console.log('registerForm');
+    const editItems = useContext(editListItemContext);
     const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
     const [defaultFolder, setDefaultFolder] = useState<Folder>();
     useEffect(() => {
@@ -219,7 +221,6 @@ const RegisterForm: React.FC<Props> = ({ word, close, editItems }) => {
                     <RiPencilFill size={'2em'} />
                     <span className="text-2xl select-none">登録</span>
                 </div>
-                {/* <input type="submit" value="登録" /> */}
             </form>
         </>
     );

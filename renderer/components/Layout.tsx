@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import SideBar from './SideBar/SideBar';
-import List, { Word } from './List/List';
+import List from './List/List';
 import DirectoryProvider from './SideBar/Providers/DirectoryProvider';
 import GetWordsProvider from './SideBar/Providers/GetWordsProvider';
-import WordsProvider, { setWordsContext, wordsContext } from './List/Providers/WordsProvider';
+import WordsProvider from './List/Providers/WordsProvider';
 import IsSelectedProvider from './SideBar/Providers/IsSelectedProvider';
 import IsOpenStatesProvider from './SideBar/Providers/IsOpenStatesProvider';
 import HandleIsOpenStatesProvider from './SideBar/Providers/HandleIsOpenStatesProvider';
@@ -12,31 +12,9 @@ import NewFolderInputValue from './SideBar/Providers/HandleSelectProvider';
 import IsCreatingNewFolderProvider from './SideBar/Providers/isCreatingNewFolderProvider';
 import HandleContextMenuProvider from './SideBar/Providers/HandleContextMenuProvider';
 import OpenedFolderProvider from './SideBar/Providers/OpenedFolderProvider';
+import EditListItemProvider from './List/Providers/EditListItemProvider';
 
 const Layout = () => {
-    const words = useContext(wordsContext);
-    const setWords = useContext(setWordsContext);
-
-    const editListItem = (word: Word, deleted: boolean = false) => {
-        if (deleted) {
-            const editedWords = [...words].filter((originalWord) => {
-                if (originalWord.id === word.id) {
-                    return false;
-                }
-                return true;
-            });
-            setWords(editedWords);
-            return;
-        }
-        const editedWords = [...words].map((originalWord) => {
-            if (originalWord.id === word.id) {
-                return word;
-            }
-            return originalWord;
-        });
-        setWords(editedWords);
-    };
-
     return (
         <OpenedFolderProvider>
             <WordsProvider>
@@ -64,7 +42,9 @@ const Layout = () => {
                     </div>
 
                     <div className="flex-1">
-                        <List editItems={editListItem} />
+                        <EditListItemProvider>
+                            <List />
+                        </EditListItemProvider>
                     </div>
                 </div>
             </WordsProvider>
