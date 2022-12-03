@@ -6,10 +6,10 @@ import { GetServerSideProps } from 'next';
 import { resetServerContext } from 'react-beautiful-dnd';
 ('next/router');
 
-export const getServerSideProps: GetServerSideProps = async () => {
-    resetServerContext();
-    return { props: {} };
-};
+// export const getServerSideProps: GetServerSideProps = async () => {
+//     resetServerContext();
+//     return { props: {} };
+// };
 
 const IndexPage = () => {
     const router = useRouter();

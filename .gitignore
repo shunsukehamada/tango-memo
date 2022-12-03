@@ -40,4 +40,4 @@ dist
 renderer/.next
 renderer/out
 db/*.db
-db/supplement.*
+db/supplement
