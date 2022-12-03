@@ -540,3 +540,26 @@ ipcMain.on(
         });
     }
 );
+
+ipcMain.handle('get-suggestion', async (_e: IpcMainInvokeEvent, value: string) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'supplement', 'suggest.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const rows = await new Promise<{ id: number; english: string }[]>((resolve, reject) => {
+        db.all(
+            'select id, english from words where english like ? limit 5',
+            `${value}%`,
+            (err: Error | null, rows: { id: number; english: string }[]) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(rows);
+            }
+        );
+    });
+    return rows.map((row) => {
+        return { id: row.id, word: row.english };
+    });
+});

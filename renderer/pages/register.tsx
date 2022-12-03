@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
@@ -6,6 +5,7 @@ import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import { RiPencilFill } from 'react-icons/ri';
 import { DirectoryStructure } from '../components/SideBar/SideBar';
+import DataList from '../components/DataList';
 type Inputs = {
     english: string;
     japanese: string;
@@ -122,11 +122,19 @@ const Register: React.FC = () => {
                                 <label className="w-20 text-center">
                                     <span className="font-bold text-lg select-none">英単語:</span>
                                 </label>
-                                <input
-                                    {...register('english', { required: true })}
-                                    className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold placeholder:select-none"
-                                    placeholder={errors.english?.type === 'required' ? '英単語は必須です' : ''}
-                                />
+                                <DataList
+                                    value={watch('english')}
+                                    setValue={(value: string) => {
+                                        setValue('english', value);
+                                    }}
+                                >
+                                    <input
+                                        {...register('english', { required: true })}
+                                        className="w-full flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold placeholder:select-none"
+                                        placeholder={errors.english?.type === 'required' ? '英単語は必須です' : ''}
+                                        list="suggest"
+                                    />
+                                </DataList>
                             </div>
                             <div className="m-1 w-5/6 flex justify-between">
                                 <label className="w-20 text-center">
