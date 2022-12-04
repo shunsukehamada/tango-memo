@@ -8,12 +8,15 @@ import { VscEdit, VscTrash } from 'react-icons/vsc';
 import EditionModal from '../EditionModal';
 import { setWordsContext, wordsContext } from './Providers/WordsProvider';
 import { openedFolderContext } from '../SideBar/Providers/OpenedFolderProvider';
+import DetailModal from '../DetailModal';
+import { PoSs } from '../../pages/register';
 
 export type Word = {
     id: number;
     english: string;
     japanese: string;
     annotation: string;
+    poss: (keyof PoSs)[];
     folder_id: string;
 };
 
@@ -32,6 +35,8 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
     const openedFolder = useContext(openedFolderContext);
     const [isShow, setIsShow] = useState<boolean>(false);
     const [editWord, setEditWord] = useState<Word | undefined>(undefined);
+    const [isShowDetail, setIsShowDetail] = useState<boolean>(false);
+    const [detailWord, setDetailWord] = useState<Word | undefined>(undefined);
 
     const reorder = (items: Word[], startIndex: number, endIndex: number) => {
         const [removed] = items.splice(startIndex, 1);
@@ -92,6 +97,13 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                     setIsShow(false);
                 }}
             />
+            <DetailModal
+                word={detailWord}
+                isShow={isShowDetail}
+                close={() => {
+                    setIsShowDetail(false);
+                }}
+            />
             <div className="flex h-full">
                 <div className="flex-1">
                     {openedFolder && (
@@ -150,6 +162,10 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                                                         isHidden={isHidden}
                                                                         index={index}
                                                                         handleContextMenu={handleContextMenu}
+                                                                        onClick={(word: Word) => {
+                                                                            setDetailWord(word);
+                                                                            setIsShowDetail(true);
+                                                                        }}
                                                                     />
                                                                 </li>
                                                             ))}

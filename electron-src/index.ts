@@ -168,12 +168,47 @@ ipcMain.handle('get-words', async (_e, parentFolder: string, folder: string): Pr
             }
         );
     });
-    const words: Word[] = await new Promise<Word[]>((resolve, reject) => {
-        db.all('select * from words where folder_id = ?', folderId, (err: Error | null, row: Word[]) => {
+    const words = await new Promise<(Word & { poss: string[] })[]>((resolve, reject) => {
+        db.all('select * from words where folder_id = ?', folderId, async (err: Error | null, rows: Word[]) => {
             if (err) {
                 reject(err);
             }
-            resolve(row);
+            const words = Promise.all(
+                rows.map(async (row) => {
+                    return await new Promise<Word & { poss: string[] }>(async (resolve) => {
+                        const posIds = await new Promise<number[]>((resolve, reject) => {
+                            db.all(
+                                'select poss_id from words_poss where words_id = ?',
+                                row.id,
+                                (err: Error | null, rows: { poss_id: number }[]) => {
+                                    if (err) {
+                                        reject(err);
+                                    }
+                                    resolve(rows.map((row) => row.poss_id));
+                                }
+                            );
+                        });
+                        const poss = await Promise.all(
+                            posIds.map(async (posId) => {
+                                return await new Promise<string>((resolve) => {
+                                    db.get(
+                                        'select pos from poss where id = ?',
+                                        posId,
+                                        (err: Error | null, row: { pos: string }) => {
+                                            if (err) {
+                                                reject(err);
+                                            }
+                                            resolve(row.pos);
+                                        }
+                                    );
+                                });
+                            })
+                        );
+                        resolve({ ...row, poss });
+                    });
+                })
+            );
+            resolve(words);
         });
     });
 

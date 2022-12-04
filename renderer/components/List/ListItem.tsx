@@ -8,9 +8,10 @@ type Props = {
     isHidden: boolean;
     index: number;
     handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, word: Word) => void;
+    onClick: (word: Word) => void;
 };
 
-const ListItem = ({ word, isHidden, index, handleContextMenu }: Props) => {
+const ListItem = ({ word, isHidden, index, handleContextMenu, onClick }: Props) => {
     return (
         <Draggable draggableId={String(word.id)} index={index}>
             {(provided, snapshot) => {
@@ -34,11 +35,7 @@ const ListItem = ({ word, isHidden, index, handleContextMenu }: Props) => {
                             <div
                                 className="border-b-4 border-solid border-gray-400  text-center mx-10 cursor-pointer"
                                 onClick={() => {
-                                    alert(
-                                        `${word.english} ${word.japanese}${
-                                            word.annotation ? '\n' + word.annotation : ''
-                                        }`
-                                    );
+                                    onClick(word);
                                 }}
                             >
                                 <span className="text-lg font-bold">{word.english}</span>
@@ -47,9 +44,7 @@ const ListItem = ({ word, isHidden, index, handleContextMenu }: Props) => {
                         <div
                             className="border-b-4 border-solid border-gray-400 w-1/2 text-center ml-10 mr-2 cursor-pointer group"
                             onClick={() => {
-                                alert(
-                                    `${word.english} ${word.japanese}${word.annotation ? '\n' + word.annotation : ''}`
-                                );
+                                onClick(word);
                             }}
                         >
                             <span className={`text-lg font-bold ${isHidden && 'opacity-0'} group-hover:opacity-100`}>
