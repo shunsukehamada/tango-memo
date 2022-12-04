@@ -1,8 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ListItem from './ListItem';
-import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import { HiOutlineViewList } from 'react-icons/hi';
-import { MdOutlineGridView } from 'react-icons/md';
 import ListItemCard from './ListItemCard';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Item, ItemParams, Menu, useContextMenu } from 'react-contexify';
@@ -20,15 +17,19 @@ export type Word = {
     folder_id: string;
 };
 
-type View = 'list' | 'grid';
+type Props = {
+    view: View;
+    setView: React.Dispatch<React.SetStateAction<View>>;
+    isHidden: boolean;
+};
 
-const List: React.FC = () => {
+export type View = 'list' | 'grid';
+
+const List: React.FC<Props> = ({ view, isHidden }) => {
+    const [isBrowser, setIsBrowser] = useState(false);
     const items = useContext(wordsContext);
     const setWords = useContext(setWordsContext);
     const openedFolder = useContext(openedFolderContext);
-
-    const [isHidden, setIsHidden] = useState(false);
-    const [view, setView] = useState<View>('list');
     const [isShow, setIsShow] = useState<boolean>(false);
     const [editWord, setEditWord] = useState<Word | undefined>(undefined);
 
@@ -36,6 +37,10 @@ const List: React.FC = () => {
         const [removed] = items.splice(startIndex, 1);
         items.splice(endIndex, 0, removed);
     };
+
+    useEffect(() => {
+        setIsBrowser(process.browser);
+    }, []);
 
     // const onDragEnd = (result: DropResult) => {
     //     const { source, destination } = result;
@@ -102,7 +107,7 @@ const List: React.FC = () => {
                                 </div>
                                 <div className="w-1/2 m-2 flex justify-between mx-10 items-center">
                                     <span className="text-lg font-bold select-none">意味</span>
-                                    <div className="relative">
+                                    {/* <div className="relative">
                                         <label className="cursor-pointer">
                                             <input
                                                 type="checkbox"
@@ -119,47 +124,49 @@ const List: React.FC = () => {
                                                 )}
                                             </div>
                                         </label>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             <div className="overflow-y-scroll scrollbar-hide" style={{ height: '90%' }}>
-                                <DragDropContext
-                                    onDragEnd={(result) => {
-                                        const { source, destination } = result;
-                                        if (!destination) {
-                                            return;
-                                        }
-                                        reorder(items, source.index, destination.index);
-                                    }}
-                                >
-                                    <Droppable droppableId="list">
-                                        {(provided, snapshot) => {
-                                            return (
-                                                <div ref={provided.innerRef} {...provided.droppableProps}>
-                                                    <ul>
-                                                        {items.map((item, index) => (
-                                                            <li key={item.id}>
-                                                                <ListItem
-                                                                    word={item}
-                                                                    isHidden={isHidden}
-                                                                    index={index}
-                                                                    handleContextMenu={handleContextMenu}
-                                                                />
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                    {provided.placeholder}
-                                                </div>
-                                            );
+                                {isBrowser && (
+                                    <DragDropContext
+                                        onDragEnd={(result) => {
+                                            const { source, destination } = result;
+                                            if (!destination) {
+                                                return;
+                                            }
+                                            reorder(items, source.index, destination.index);
                                         }}
-                                    </Droppable>
-                                </DragDropContext>
+                                    >
+                                        <Droppable droppableId="list">
+                                            {(provided, snapshot) => {
+                                                return (
+                                                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                                                        <ul>
+                                                            {items.map((item, index) => (
+                                                                <li key={item.id}>
+                                                                    <ListItem
+                                                                        word={item}
+                                                                        isHidden={isHidden}
+                                                                        index={index}
+                                                                        handleContextMenu={handleContextMenu}
+                                                                    />
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                        {provided.placeholder}
+                                                    </div>
+                                                );
+                                            }}
+                                        </Droppable>
+                                    </DragDropContext>
+                                )}
                             </div>
                         </div>
                     ) : (
                         <div className="mt-2 h-screen">
                             <div className="flex justify-end">
-                                <label className="cursor-pointer">
+                                {/* <label className="cursor-pointer">
                                     <input
                                         type="checkbox"
                                         className="absolute hidden"
@@ -174,7 +181,7 @@ const List: React.FC = () => {
                                             <AiOutlineEye size={'2em'} />
                                         )}
                                     </div>
-                                </label>
+                                </label> */}
                             </div>
                             <div
                                 className="flex flex-wrap overflow-y-scroll -mt-3 scrollbar-hide"
@@ -193,22 +200,26 @@ const List: React.FC = () => {
                         </div>
                     )}
                 </div>
-                <div className="flex justify-between items-end m-1 mt-5 w-24 h-12">
+                {/* <div className="flex justify-between items-end m-1 mt-5 w-24 h-12">
                     <HiOutlineViewList
-                        size={view === 'list' ? '3em' : '2em'}
+                        // size={view === 'list' ? '3em' : '2em'}
+                        size={'3em'}
                         className="m-1 cursor-pointer"
+                        style={view === 'list' ? { display: 'none' } : {}}
                         onClick={() => {
                             setView('list');
                         }}
                     />
                     <MdOutlineGridView
-                        size={view === 'grid' ? '3em' : '2em'}
+                        // size={view === 'grid' ? '3em' : '2em'}
+                        size={'3em'}
+                        style={view === 'grid' ? { display: 'none' } : {}}
                         className="m-1 cursor-pointer"
                         onClick={() => {
                             setView('grid');
                         }}
                     />
-                </div>
+                </div> */}
                 <Menu id={MENU_ID}>
                     <Item id="delete" onClick={handleItemClick}>
                         <VscTrash />

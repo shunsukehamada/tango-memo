@@ -1,6 +1,7 @@
 import 'tailwindcss/tailwind.css';
 import '../styles/global.css';
 import { AnimatePresence } from 'framer-motion';
+import { ThemeProvider } from 'next-themes'
 
 function MyApp({ Component, pageProps, router }) {
     return (
@@ -12,7 +13,9 @@ function MyApp({ Component, pageProps, router }) {
                 console.log('EXIT COMPLETE', router.asPath);
             }}
         >
-            <Component {...pageProps} />
+            <ThemeProvider attribute="class" defaultTheme="light">
+                <Component {...pageProps} />
+            </ThemeProvider>
         </AnimatePresence>
     );
 }

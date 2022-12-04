@@ -14,7 +14,7 @@ type Props = {
     >;
 };
 
-const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
+const Suggestion: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
     const [isFocus, setIsFocus] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [options, setOptions] = useState<{ id: number; word: string }[]>([]);
@@ -73,9 +73,6 @@ const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
                     setIsFocus(true);
                 }}
                 onBlur={() => {
-                    // setTimeout(() => {
-                    //     setIsFocus(false);
-                    // }, 150);
                     setIsFocus(false);
                 }}
                 onChange={() => {
@@ -99,12 +96,8 @@ const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
                             return (
                                 <div
                                     key={option.id}
-                                    className="border-b-gray-100 border-b-2 border-solid hover:bg-gray-200 cursor-pointer text-center"
+                                    className="border-b-gray-100 border-b-2 border-solid hover:bg-gray-200 cursor-pointer text-center text-black"
                                     style={index === selectedIndex ? { backgroundColor: 'rgba(0, 0, 0, 0.1)' } : {}}
-                                    // onClick={(e) => {
-                                    //     e.stopPropagation();
-                                    //     setIsFocus(false);
-                                    // }}
                                     onMouseDown={(e) => {
                                         e.stopPropagation();
                                         setValue(option.word);
@@ -130,4 +123,4 @@ const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
     );
 };
 
-export default DataList;
+export default Suggestion;

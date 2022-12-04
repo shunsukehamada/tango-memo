@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SideBar from './SideBar/SideBar';
-import List from './List/List';
+import List, { View } from './List/List';
 import DirectoryProvider from './SideBar/Providers/DirectoryProvider';
 import GetWordsProvider from './SideBar/Providers/GetWordsProvider';
 import WordsProvider from './List/Providers/WordsProvider';
@@ -14,11 +14,16 @@ import HandleContextMenuProvider from './SideBar/Providers/HandleContextMenuProv
 import OpenedFolderProvider from './SideBar/Providers/OpenedFolderProvider';
 import EditFolderProvider from './SideBar/Providers/EditFolderValueProvider';
 import HandleEditFolderProvider from './SideBar/Providers/HandleEditFolderProvider';
+import Header from './Header';
 
 const Layout = () => {
+    const [view, setView] = useState<View>('list');
+    const [isHidden, setIsHidden] = useState(false);
+
     return (
         <OpenedFolderProvider>
             <WordsProvider>
+                <Header view={view} setView={setView} isHidden={isHidden} setIsHidden={setIsHidden} />
                 <div className="flex overflow-y-hidden">
                     <div className="h-screen flex items-center">
                         <DirectoryProvider>
@@ -47,7 +52,7 @@ const Layout = () => {
                     </div>
 
                     <div className="flex-1">
-                        <List />
+                        <List view={view} setView={setView} isHidden={isHidden} />
                     </div>
                 </div>
             </WordsProvider>

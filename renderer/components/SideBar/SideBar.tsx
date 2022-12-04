@@ -142,7 +142,7 @@ const SideBar: React.FC = () => {
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
             <div
-                className="grow-0 shrink-0 flex border-r-2 border-solid border-gray-400 flex-row bg-white my"
+                className="grow-0 shrink-0 flex border-r-2 border-solid border-gray-400 flex-row"
                 ref={sidebarRef}
                 style={{
                     width: sidebarWidth,
@@ -251,7 +251,7 @@ const SideBar: React.FC = () => {
             >
                 <div className="w-1 h-full group-hover:bg-blue-500 mx-auto"></div>
             </div>
-            <div className="flex-1 flex flex-col bg-white h-full max-h-full z-10"></div>
+            <div className="flex-1 flex flex-col h-full max-h-full z-10"></div>
             <Menu id={'directory'}>
                 <Item id="delete" onClick={handleItemClick}>
                     <VscTrash />

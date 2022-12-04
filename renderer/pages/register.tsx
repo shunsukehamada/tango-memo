@@ -1,11 +1,13 @@
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState, useCallback, Ref } from 'react';
+import { useEffect, useRef, useState, useCallback, Ref, useContext } from 'react';
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import { RiPencilFill } from 'react-icons/ri';
 import { DirectoryStructure } from '../components/SideBar/SideBar';
-import DataList from '../components/DataList';
+import Suggestion from '../components/Suggestion';
+import { useTheme } from 'next-themes';
+
 type Inputs = {
     english: string;
     japanese: string;
@@ -37,6 +39,7 @@ const Register: React.FC = () => {
     const animationControl = useAnimationControls();
     const formRef = useRef();
     const textAreaRef = useRef<HTMLTextAreaElement>();
+    const { theme } = useTheme();
 
     if (typeof document !== 'undefined') {
         document.addEventListener('wheel', (e) => {
@@ -162,7 +165,7 @@ const Register: React.FC = () => {
                                 <label className="w-20 text-center">
                                     <span className="font-bold text-lg select-none">英単語:</span>
                                 </label>
-                                <DataList
+                                <Suggestion
                                     value={watch('english')}
                                     setValue={(value: string) => {
                                         setValue('english', value);
@@ -172,10 +175,11 @@ const Register: React.FC = () => {
                                     <input
                                         {...register('english', { required: true })}
                                         className="w-full flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold placeholder:select-none"
+                                        style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
                                         placeholder={errors.english?.type === 'required' ? '英単語は必須です' : ''}
                                         list="suggest"
                                     />
-                                </DataList>
+                                </Suggestion>
                             </div>
                             <div className="m-1 w-5/6 flex justify-between">
                                 <label className="w-20 text-center">
@@ -184,6 +188,7 @@ const Register: React.FC = () => {
                                 <textarea
                                     {...register('japanese', { required: true })}
                                     className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 resize-none text-center text-xl font-bold placeholder:select-none"
+                                    style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
                                     rows={rows <= 10 ? rows : 10}
                                     placeholder={errors.japanese?.type === 'required' ? '訳は必須です' : ''}
                                     ref={useCombinedRefs(textAreaRef, reactHookFormJapaneseRef)}
@@ -196,6 +201,7 @@ const Register: React.FC = () => {
                                 <input
                                     {...register('annotation')}
                                     className="flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold"
+                                    style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
                                 />
                             </div>
                             <div className="m-1 w-5/6 flex justify-between items-center">
@@ -224,17 +230,21 @@ const Register: React.FC = () => {
                                                                 borderRadius: 0,
                                                                 boxShadow: 'none',
                                                                 ':focus': { outlineColor: 'red' },
+                                                                backgroundColor: 'rgba(0,0,0,0)',
                                                             };
                                                         },
                                                         group: (baseStyles) => {
                                                             return {
                                                                 ...baseStyles,
-                                                                // fontWeight: 200,
                                                                 fontSize: '1.1rem',
+                                                                color: 'black',
                                                             };
                                                         },
                                                         groupHeading: (baseStyles) => {
-                                                            return { ...baseStyles, fontWeight: 700 };
+                                                            return {
+                                                                ...baseStyles,
+                                                                fontWeight: 700,
+                                                            };
                                                         },
                                                         valueContainer: (baseStyles) => {
                                                             return {
@@ -243,6 +253,13 @@ const Register: React.FC = () => {
                                                                 fontSize: '1.2rem',
                                                                 fontWeight: 700,
                                                                 userSelect: 'none',
+                                                                color: 'black',
+                                                            };
+                                                        },
+                                                        singleValue: (baseStyles) => {
+                                                            return {
+                                                                ...baseStyles,
+                                                                color: theme === 'dark' ? 'white' : 'dark',
                                                             };
                                                         },
                                                     }}
