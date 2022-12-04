@@ -20,6 +20,7 @@ const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
     const [options, setOptions] = useState<{ id: number; word: string }[]>([]);
 
     useEffect(() => {
+        setSelectedIndex(0);
         const getSuggestion = async (value: string) => {
             const options = (await global.ipcRenderer.invoke('get-suggestion', value)) as {
                 id: number;
@@ -72,6 +73,9 @@ const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
                     setIsFocus(true);
                 }}
                 onBlur={() => {
+                    // setTimeout(() => {
+                    //     setIsFocus(false);
+                    // }, 150);
                     setIsFocus(false);
                 }}
                 onChange={() => {
@@ -97,7 +101,18 @@ const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
                                     key={option.id}
                                     className="border-b-gray-100 border-b-2 border-solid hover:bg-gray-200 cursor-pointer text-center"
                                     style={index === selectedIndex ? { backgroundColor: 'rgba(0, 0, 0, 0.1)' } : {}}
-                                    onClick={() => {
+                                    // onClick={(e) => {
+                                    //     e.stopPropagation();
+                                    //     setIsFocus(false);
+                                    // }}
+                                    onMouseDown={(e) => {
+                                        e.stopPropagation();
+                                        setValue(option.word);
+                                        setIsFocus(false);
+                                        (async () => {
+                                            const info = await global.ipcRenderer.invoke('get-word-info', option.id);
+                                            setInfo(info);
+                                        })();
                                         setIsFocus(false);
                                     }}
                                 >
