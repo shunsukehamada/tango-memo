@@ -1,13 +1,20 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { VscTriangleDown } from 'react-icons/vsc';
+import { PoSs } from '../pages/register';
 
 type Props = {
     children: ReactNode;
     value: string;
     setValue?: (value: string) => void;
+    setInfo: Dispatch<
+        SetStateAction<{
+            japanese: string;
+            poss: (keyof PoSs)[];
+        }>
+    >;
 };
 
-const DataList: React.FC<Props> = ({ children, value, setValue }) => {
+const DataList: React.FC<Props> = ({ children, value, setValue, setInfo }) => {
     const [isFocus, setIsFocus] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [options, setOptions] = useState<{ id: number; word: string }[]>([]);
@@ -49,6 +56,10 @@ const DataList: React.FC<Props> = ({ children, value, setValue }) => {
             if (options[selectedIndex]) {
                 setValue(options[selectedIndex].word);
                 setIsFocus(false);
+                (async () => {
+                    const info = await global.ipcRenderer.invoke('get-word-info', options[selectedIndex].id);
+                    setInfo(info);
+                })();
             }
             return;
         }

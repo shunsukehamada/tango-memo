@@ -17,7 +17,7 @@ type Inputs = {
     pos: (keyof PoSs)[];
 };
 
-type PoSs = {
+export type PoSs = {
     Noun: '名詞';
     Verb: '動詞';
     Adjective: '形容詞';
@@ -28,10 +28,12 @@ type PoSs = {
     Interjection: '感動詞';
 };
 
+// FIXME: 訳の自動改行
 const Register: React.FC = () => {
     const router = useRouter();
     const [isTransitioned, setIsTransitioned] = useState(false);
     const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
+    const [info, setInfo] = useState<{ japanese: string; poss: (keyof PoSs)[] }>({ japanese: '', poss: [] });
     const animationControl = useAnimationControls();
 
     if (typeof document !== 'undefined') {
@@ -41,6 +43,16 @@ const Register: React.FC = () => {
             }
         });
     }
+    const {
+        register,
+        handleSubmit,
+        watch,
+        control,
+        formState: { errors },
+        reset,
+        setValue,
+    } = useForm<Inputs>({ mode: 'all', defaultValues: { japanese: '', pos: [] } });
+
     useEffect(() => {
         const getAllFolders = async () => {
             const allFolders = (await global.ipcRenderer.invoke('get-all-folders')) as DirectoryStructure[];
@@ -64,15 +76,10 @@ const Register: React.FC = () => {
         transition();
     }, [isTransitioned]);
 
-    const {
-        register,
-        handleSubmit,
-        watch,
-        control,
-        formState: { errors },
-        reset,
-        setValue,
-    } = useForm<Inputs>({ mode: 'all', defaultValues: { japanese: '', pos: [] } });
+    useEffect(() => {
+        setValue('japanese', info.japanese);
+        setValue('pos', info.poss);
+    }, [info]);
 
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         global.ipcRenderer.send('register-new-word', data);
@@ -127,6 +134,7 @@ const Register: React.FC = () => {
                                     setValue={(value: string) => {
                                         setValue('english', value);
                                     }}
+                                    setInfo={setInfo}
                                 >
                                     <input
                                         {...register('english', { required: true })}

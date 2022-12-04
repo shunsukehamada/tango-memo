@@ -563,3 +563,44 @@ ipcMain.handle('get-suggestion', async (_e: IpcMainInvokeEvent, value: string) =
         return { id: row.id, word: row.english };
     });
 });
+
+ipcMain.handle('get-word-info', async (_e: IpcMainInvokeEvent, id: number) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'supplement', 'suggest.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const japanese = await new Promise<string>((resolve, reject) => {
+        db.get('select japanese from words where id = ?', id, (err: Error | null, row: { japanese: string }) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(row.japanese);
+        });
+    });
+    const posIds = await new Promise<number[]>((resolve, reject) => {
+        db.all(
+            'select poss_id from words_poss where words_id = ?',
+            id,
+            (err: Error | null, rows: { poss_id: number }[]) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(rows.map((row) => row.poss_id));
+            }
+        );
+    });
+    const poss = await Promise.all(
+        posIds.map(async (posId) => {
+            return await new Promise<string>((resolve, reject) => {
+                db.get('select pos from poss where id = ?', posId, (err: Error | null, row: { pos: string }) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(row.pos);
+                });
+            });
+        })
+    );
+    return { japanese, poss };
+});
