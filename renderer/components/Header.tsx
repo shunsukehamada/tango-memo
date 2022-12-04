@@ -22,18 +22,11 @@ const Header: React.FC<Props> = ({ view, setView, isHidden, setIsHidden }) => {
                 <div className="flex">
                     <div
                         onClick={() => {
-                            // global.ipcRenderer.send('toggle-dark-mode');
                             if (theme === 'light') {
-                                // document.body.classList.add('dark');
-                                // setIsDark(false);
                                 setTheme('dark');
                             } else {
-                                // document.body.classList.remove('dark');
                                 setTheme('light');
-                                // setIsDark(true);
                             }
-                            // isDark ? document.body.classList.remove('dark') : document.body.classList.add('dark');
-                            // setIsDark((isDark) => !isDark);
                         }}
                     >
                         {theme === 'dark' ? <MdOutlineDarkMode size={'2em'} /> : <MdDarkMode size={'2em'} />}

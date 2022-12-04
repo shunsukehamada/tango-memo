@@ -3,7 +3,7 @@ import path, { join } from 'path';
 import { format } from 'url';
 
 // Packages
-import { BrowserWindow, app, ipcMain, nativeTheme } from 'electron';
+import { BrowserWindow, app, ipcMain } from 'electron';
 import isDev from 'electron-is-dev';
 import prepareNext from 'electron-next';
 import sqlite3 from 'sqlite3';
@@ -57,7 +57,6 @@ app.on('ready', async () => {
             preload: join(__dirname, 'preload.js'),
         },
     });
-    // nativeTheme.themeSource = 'dark';
 
     const url = isDev
         ? 'http://localhost:8000/'
@@ -72,10 +71,6 @@ app.on('ready', async () => {
 
 // Quit the app once all windows are closed
 app.on('window-all-closed', app.quit);
-
-ipcMain.on('toggle-dark-mode', () => {
-    nativeTheme.themeSource = nativeTheme.shouldUseDarkColors ? 'light' : 'dark';
-});
 
 // listen the channel `message` and resend the received message to the renderer process
 ipcMain.handle('sample', async () => {
