@@ -49,7 +49,7 @@ const RegisterForm: React.FC<Props> = ({ word, close }) => {
             setDirectoryStructureState(allFolders);
         };
         const getFolder = async () => {
-            const folder = (await global.ipcRenderer.invoke('get-folder', word.folder_id)) as Folder;
+            const folder = (await global.ipcRenderer.invoke('get-folder', word?.folder_id)) as Folder;
             setDefaultFolder(folder);
             setValue('folder', folder);
         };
@@ -66,11 +66,10 @@ const RegisterForm: React.FC<Props> = ({ word, close }) => {
         setValue,
     } = useForm<Inputs>({
         mode: 'all',
-        defaultValues: { ...word, pos: word.poss as (keyof PoSs)[] },
+        defaultValues: { ...word, pos: word?.poss as (keyof PoSs)[] },
     });
-    console.log(Object.keys(word.poss));
     const onSubmit: SubmitHandler<Inputs> = (data) => {
-        global.ipcRenderer.send('edit-word', data, word.id);
+        global.ipcRenderer.send('edit-word', data, word?.id);
         if (
             defaultFolder.value.parent === data.folder.value.parent &&
             defaultFolder.value.child === data.folder.value.child

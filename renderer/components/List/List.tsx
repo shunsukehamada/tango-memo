@@ -10,6 +10,7 @@ import { setWordsContext, wordsContext } from './Providers/WordsProvider';
 import { openedFolderContext } from '../SideBar/Providers/OpenedFolderProvider';
 import DetailModal from '../DetailModal';
 import { PoSs } from '../../pages/register';
+import DeleteModal from '../DeleteModal';
 
 export type Word = {
     id: number;
@@ -26,6 +27,8 @@ type Props = {
     isHidden: boolean;
 };
 
+export type ModalResolveType = (value: boolean | PromiseLike<boolean>) => void;
+
 export type View = 'list' | 'grid';
 
 const List: React.FC<Props> = ({ view, isHidden }) => {
@@ -37,7 +40,9 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
     const [editWord, setEditWord] = useState<Word | undefined>(undefined);
     const [isShowDetail, setIsShowDetail] = useState<boolean>(false);
     const [detailWord, setDetailWord] = useState<Word | undefined>(undefined);
-
+    const [modalResolve, setModalResolve] = useState<ModalResolveType | undefined>();
+    const [deleteWord, setDeleteWord] = useState<Word | undefined>(undefined);
+    const [isShowDelete, setIsShowDelete] = useState<boolean>(false);
     const reorder = (items: Word[], startIndex: number, endIndex: number) => {
         const [removed] = items.splice(startIndex, 1);
         items.splice(endIndex, 0, removed);
@@ -69,9 +74,11 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
         });
     };
 
-    const handleItemClick = ({ id, props }: ItemParams<{ word: Word }>) => {
+    const handleItemClick = async ({ id, props }: ItemParams<{ word: Word }>) => {
         if (id === 'delete') {
-            if (confirm(`${props.word.english}を削除しますか?`)) {
+            setDeleteWord(props.word);
+            const ok = await handleConfirm(props.word.english);
+            if (ok) {
                 global.ipcRenderer.send('delete-word', props.word.id);
                 setWords(
                     [...items].filter((word) => {
@@ -88,6 +95,16 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
         }
     };
 
+    const handleConfirm = async (english: string): Promise<boolean> => {
+        setIsShowDelete(true);
+        const ok = await new Promise<boolean>((resolve) => {
+            setModalResolve(() => {
+                return resolve;
+            });
+        });
+        setIsShowDelete(false);
+        return ok;
+    };
     return (
         <>
             <EditionModal
@@ -104,6 +121,15 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                     setIsShowDetail(false);
                 }}
             />
+            <DeleteModal
+                word={deleteWord}
+                isShow={isShowDelete}
+                close={() => {
+                    modalResolve ? modalResolve(false) : setIsShowDelete(false);
+                }}
+                resolve={modalResolve}
+            />
+
             <div className="flex h-full">
                 <div className="flex-1">
                     {openedFolder && (
@@ -119,24 +145,6 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                 </div>
                                 <div className="w-1/2 m-2 flex justify-between mx-10 items-center">
                                     <span className="text-lg font-bold select-none">意味</span>
-                                    {/* <div className="relative">
-                                        <label className="cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="absolute hidden"
-                                                onChange={(e) => {
-                                                    setIsHidden(e.currentTarget.checked);
-                                                }}
-                                            />
-                                            <div>
-                                                {isHidden ? (
-                                                    <AiOutlineEyeInvisible size={'2em'} />
-                                                ) : (
-                                                    <AiOutlineEye size={'2em'} />
-                                                )}
-                                            </div>
-                                        </label>
-                                    </div> */}
                                 </div>
                             </div>
                             <div className="overflow-y-scroll scrollbar-hide" style={{ height: '90%' }}>
@@ -181,24 +189,6 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                         </div>
                     ) : (
                         <div className="mt-2 h-screen">
-                            <div className="flex justify-end">
-                                {/* <label className="cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        className="absolute hidden"
-                                        onChange={(e) => {
-                                            setIsHidden(e.currentTarget.checked);
-                                        }}
-                                    />
-                                    <div>
-                                        {isHidden ? (
-                                            <AiOutlineEyeInvisible size={'2em'} />
-                                        ) : (
-                                            <AiOutlineEye size={'2em'} />
-                                        )}
-                                    </div>
-                                </label> */}
-                            </div>
                             <div
                                 className="flex flex-wrap overflow-y-scroll -mt-3 scrollbar-hide"
                                 style={{ height: '90%' }}
@@ -216,26 +206,6 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                         </div>
                     )}
                 </div>
-                {/* <div className="flex justify-between items-end m-1 mt-5 w-24 h-12">
-                    <HiOutlineViewList
-                        // size={view === 'list' ? '3em' : '2em'}
-                        size={'3em'}
-                        className="m-1 cursor-pointer"
-                        style={view === 'list' ? { display: 'none' } : {}}
-                        onClick={() => {
-                            setView('list');
-                        }}
-                    />
-                    <MdOutlineGridView
-                        // size={view === 'grid' ? '3em' : '2em'}
-                        size={'3em'}
-                        style={view === 'grid' ? { display: 'none' } : {}}
-                        className="m-1 cursor-pointer"
-                        onClick={() => {
-                            setView('grid');
-                        }}
-                    />
-                </div> */}
                 <Menu id={MENU_ID}>
                     <Item id="delete" onClick={handleItemClick}>
                         <VscTrash />
