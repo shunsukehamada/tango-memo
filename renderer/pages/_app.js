@@ -1,7 +1,7 @@
 import 'tailwindcss/tailwind.css';
 import '../styles/global.css';
 import { AnimatePresence } from 'framer-motion';
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider } from 'next-themes';
 
 function MyApp({ Component, pageProps, router }) {
     return (

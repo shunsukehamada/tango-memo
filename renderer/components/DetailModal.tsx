@@ -19,7 +19,7 @@ const DetailModal: React.FC<Props> = ({ word, isShow, close }) => {
         Interjection: '感動詞',
     };
     return (
-        <Modal isShow={isShow} close={close}>
+        <Modal isShow={isShow} close={close} h={'50%'} w={'50%'}>
             <div className="text-black text-center flex flex-col justify-around h-full">
                 <div>
                     <span className="text-xl font-bold">{word?.english}</span>

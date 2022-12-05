@@ -13,6 +13,7 @@ import {
 } from './Providers/NewFolderNameInputValueProvider';
 import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
 import { handleEditFolderContext, setEditFolderContext } from './Providers/HandleEditFolderProvider';
+import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -42,8 +43,10 @@ const SideBar: React.FC = () => {
     const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
     const setEditFolder = useContext(setEditFolderContext);
     const handleEditFolder = useContext(handleEditFolderContext);
+    const [isShow, setIsShow] = useState<boolean>(false);
+    const [modalResolve, setModalResolve] = useState<ModalResolveType | undefined>();
+    const [deleteDirectory, setDeleteDirectory] = useState<string>('');
 
-    const [isDeletingFolder, setIsDeletingFolder] = useState<boolean>(false);
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(268);
@@ -85,12 +88,6 @@ const SideBar: React.FC = () => {
     }, [directoryStructure]);
 
     useEffect(() => {
-        if (isDeletingFolder) {
-            setIsDeletingFolder(false);
-        }
-    }, [isDeletingFolder]);
-
-    useEffect(() => {
         window.addEventListener('mousemove', resize);
         window.addEventListener('mouseup', stopResizing);
         return () => {
@@ -123,15 +120,17 @@ const SideBar: React.FC = () => {
         setDirectoryStructure(newDirectoryStructure);
     };
 
-    const handleItemClick = ({ id, props }: ItemParams<{ parent: string; child?: string }>) => {
+    const handleItemClick = async ({ id, props }: ItemParams<{ parent: string; child?: string }>) => {
         if (id === 'delete') {
-            if (confirm(`${props.child ? `${props.parent}/${props.child}` : props.parent}を削除しますか?`)) {
-                setIsDeletingFolder(true);
+            setDeleteDirectory(props.child ? `${props.parent}/${props.child}` : props.parent);
+            const ok = await handleConfirm(setIsShow, setModalResolve);
+            if (ok) {
                 props.child
                     ? global.ipcRenderer.send('delete-child-folder', props)
                     : global.ipcRenderer.send('delete-parent-folder', props);
                 deleteFolder(props.parent, props.child);
             }
+            setDeleteDirectory('');
             return;
         }
         if (id === 'edit') {
@@ -141,6 +140,14 @@ const SideBar: React.FC = () => {
     };
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
+            <DeleteModal
+                isShow={isShow}
+                close={() => {
+                    setIsShow(false);
+                }}
+                resolve={modalResolve}
+                deleteValue={deleteDirectory}
+            />
             <div
                 className="grow-0 shrink-0 flex border-r-2 border-solid border-gray-400 flex-row"
                 ref={sidebarRef}

@@ -10,7 +10,7 @@ import { setWordsContext, wordsContext } from './Providers/WordsProvider';
 import { openedFolderContext } from '../SideBar/Providers/OpenedFolderProvider';
 import DetailModal from '../DetailModal';
 import { PoSs } from '../../pages/register';
-import DeleteModal from '../DeleteModal';
+import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
 
 export type Word = {
     id: number;
@@ -26,8 +26,6 @@ type Props = {
     setView: React.Dispatch<React.SetStateAction<View>>;
     isHidden: boolean;
 };
-
-export type ModalResolveType = (value: boolean | PromiseLike<boolean>) => void;
 
 export type View = 'list' | 'grid';
 
@@ -77,7 +75,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
     const handleItemClick = async ({ id, props }: ItemParams<{ word: Word }>) => {
         if (id === 'delete') {
             setDeleteWord(props.word);
-            const ok = await handleConfirm(props.word.english);
+            const ok = await handleConfirm(setIsShowDelete, setModalResolve);
             if (ok) {
                 global.ipcRenderer.send('delete-word', props.word.id);
                 setWords(
@@ -95,16 +93,6 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
         }
     };
 
-    const handleConfirm = async (english: string): Promise<boolean> => {
-        setIsShowDelete(true);
-        const ok = await new Promise<boolean>((resolve) => {
-            setModalResolve(() => {
-                return resolve;
-            });
-        });
-        setIsShowDelete(false);
-        return ok;
-    };
     return (
         <>
             <EditionModal
@@ -122,7 +110,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                 }}
             />
             <DeleteModal
-                word={deleteWord}
+                deleteValue={deleteWord?.english}
                 isShow={isShowDelete}
                 close={() => {
                     modalResolve ? modalResolve(false) : setIsShowDelete(false);
