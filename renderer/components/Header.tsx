@@ -5,6 +5,7 @@ import { CgSearchFound } from 'react-icons/cg';
 import { View } from './List/List';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { useTheme } from 'next-themes';
+import PosFilter from './Header/PosFilter';
 
 type Props = {
     view: View;
@@ -48,7 +49,8 @@ const Header: React.FC<Props> = ({ view, setView, isHidden, setIsHidden }) => {
                         <MdOutlineGridView size={'2em'} className="cursor-pointer mx-2" />
                     </div>
                 </div>
-                <div className="flex">
+                <div className="flex items-center">
+                    <PosFilter />
                     <div
                         className="mr-2"
                         onClick={() => {
@@ -61,7 +63,7 @@ const Header: React.FC<Props> = ({ view, setView, isHidden, setIsHidden }) => {
                         <div className="">
                             <CgSearchFound size={'1.5em'} />
                         </div>
-                        <input type="text" className="text-xl bg-white"/>
+                        <input type="text" className="text-xl bg-white" />
                     </div>
                 </div>
             </div>

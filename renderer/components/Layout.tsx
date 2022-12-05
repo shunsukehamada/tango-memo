@@ -15,6 +15,7 @@ import OpenedFolderProvider from './SideBar/Providers/OpenedFolderProvider';
 import EditFolderProvider from './SideBar/Providers/EditFolderValueProvider';
 import HandleEditFolderProvider from './SideBar/Providers/HandleEditFolderProvider';
 import Header from './Header';
+import FilterProvider from './Header/FilterProvider';
 
 const Layout = () => {
     const [view, setView] = useState<View>('list');
@@ -23,38 +24,40 @@ const Layout = () => {
     return (
         <OpenedFolderProvider>
             <WordsProvider>
-                <Header view={view} setView={setView} isHidden={isHidden} setIsHidden={setIsHidden} />
-                <div className="flex overflow-y-hidden">
-                    <div className="h-screen flex items-center">
-                        <DirectoryProvider>
-                            <GetWordsProvider>
-                                <IsSelectedProvider>
-                                    <IsOpenStatesProvider>
-                                        <HandleIsOpenStatesProvider>
-                                            <HandleSelectProvider>
-                                                <NewFolderNameInputValueProvider>
-                                                    <IsCreatingNewFolderProvider>
-                                                        <HandleContextMenuProvider>
-                                                            <EditFolderProvider>
-                                                                <HandleEditFolderProvider>
-                                                                    <SideBar />
-                                                                </HandleEditFolderProvider>
-                                                            </EditFolderProvider>
-                                                        </HandleContextMenuProvider>
-                                                    </IsCreatingNewFolderProvider>
-                                                </NewFolderNameInputValueProvider>
-                                            </HandleSelectProvider>
-                                        </HandleIsOpenStatesProvider>
-                                    </IsOpenStatesProvider>
-                                </IsSelectedProvider>
-                            </GetWordsProvider>
-                        </DirectoryProvider>
-                    </div>
+                <FilterProvider>
+                    <Header view={view} setView={setView} isHidden={isHidden} setIsHidden={setIsHidden} />
+                    <div className="flex overflow-y-hidden">
+                        <div className="h-screen flex items-center">
+                            <DirectoryProvider>
+                                <GetWordsProvider>
+                                    <IsSelectedProvider>
+                                        <IsOpenStatesProvider>
+                                            <HandleIsOpenStatesProvider>
+                                                <HandleSelectProvider>
+                                                    <NewFolderNameInputValueProvider>
+                                                        <IsCreatingNewFolderProvider>
+                                                            <HandleContextMenuProvider>
+                                                                <EditFolderProvider>
+                                                                    <HandleEditFolderProvider>
+                                                                        <SideBar />
+                                                                    </HandleEditFolderProvider>
+                                                                </EditFolderProvider>
+                                                            </HandleContextMenuProvider>
+                                                        </IsCreatingNewFolderProvider>
+                                                    </NewFolderNameInputValueProvider>
+                                                </HandleSelectProvider>
+                                            </HandleIsOpenStatesProvider>
+                                        </IsOpenStatesProvider>
+                                    </IsSelectedProvider>
+                                </GetWordsProvider>
+                            </DirectoryProvider>
+                        </div>
 
-                    <div className="flex-1">
-                        <List view={view} setView={setView} isHidden={isHidden} />
+                        <div className="flex-1">
+                            <List view={view} setView={setView} isHidden={isHidden} />
+                        </div>
                     </div>
-                </div>
+                </FilterProvider>
             </WordsProvider>
         </OpenedFolderProvider>
     );

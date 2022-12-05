@@ -11,6 +11,7 @@ import { openedFolderContext } from '../SideBar/Providers/OpenedFolderProvider';
 import DetailModal from '../DetailModal';
 import { PoSs, PoSsType } from '../../pages/register';
 import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
+import { filterContext } from '../Header/FilterProvider';
 
 export type Word = {
     id: number;
@@ -41,6 +42,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
     const [modalResolve, setModalResolve] = useState<ModalResolveType | undefined>();
     const [deleteWord, setDeleteWord] = useState<Word | undefined>(undefined);
     const [isShowDelete, setIsShowDelete] = useState<boolean>(false);
+    const filterStates = useContext(filterContext);
     const reorder = (items: Word[], startIndex: number, endIndex: number) => {
         const [removed] = items.splice(startIndex, 1);
         items.splice(endIndex, 0, removed);
@@ -151,20 +153,31 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                                 return (
                                                     <div ref={provided.innerRef} {...provided.droppableProps}>
                                                         <ul>
-                                                            {items.map((item, index) => (
-                                                                <li key={item.id}>
-                                                                    <ListItem
-                                                                        word={item}
-                                                                        isHidden={isHidden}
-                                                                        index={index}
-                                                                        handleContextMenu={handleContextMenu}
-                                                                        onClick={(word: Word) => {
-                                                                            setDetailWord(word);
-                                                                            setIsShowDetail(true);
-                                                                        }}
-                                                                    />
-                                                                </li>
-                                                            ))}
+                                                            {items.map((item, index) => {
+                                                                return (
+                                                                    <>
+                                                                        {(item.poss.some((pos) => filterStates[pos]) ||
+                                                                            Object.keys(PoSs).every(
+                                                                                (pos) => !filterStates[pos]
+                                                                            )) && (
+                                                                            <li key={item.id}>
+                                                                                <ListItem
+                                                                                    word={item}
+                                                                                    isHidden={isHidden}
+                                                                                    index={index}
+                                                                                    handleContextMenu={
+                                                                                        handleContextMenu
+                                                                                    }
+                                                                                    onClick={(word: Word) => {
+                                                                                        setDetailWord(word);
+                                                                                        setIsShowDetail(true);
+                                                                                    }}
+                                                                                />
+                                                                            </li>
+                                                                        )}
+                                                                    </>
+                                                                );
+                                                            })}
                                                         </ul>
                                                         {provided.placeholder}
                                                     </div>
