@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { HiOutlineViewList } from 'react-icons/hi';
 import { MdDarkMode, MdOutlineDarkMode, MdOutlineGridView } from 'react-icons/md';
 import { CgSearchFound } from 'react-icons/cg';
@@ -6,6 +6,7 @@ import { View } from './List/List';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { useTheme } from 'next-themes';
 import PosFilter from './Header/PosFilter';
+import { setValueContext, valueContext } from './Header/SearchWordsProvider';
 
 type Props = {
     view: View;
@@ -16,7 +17,8 @@ type Props = {
 
 const Header: React.FC<Props> = ({ view, setView, isHidden, setIsHidden }) => {
     const { theme, setTheme } = useTheme();
-
+    const value = useContext(valueContext);
+    const setValue = useContext(setValueContext);
     return (
         <div>
             <div className="flex items-center justify-between p-3 bg-gray-100 text-black">
@@ -63,7 +65,14 @@ const Header: React.FC<Props> = ({ view, setView, isHidden, setIsHidden }) => {
                         <div className="">
                             <CgSearchFound size={'1.5em'} />
                         </div>
-                        <input type="text" className="text-xl bg-white" />
+                        <input
+                            type="text"
+                            className="text-xl bg-white outline-none"
+                            value={value}
+                            onChange={(e) => {
+                                setValue(e.target.value);
+                            }}
+                        />
                     </div>
                 </div>
             </div>

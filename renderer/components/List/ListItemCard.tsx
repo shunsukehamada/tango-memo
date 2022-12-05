@@ -5,15 +5,16 @@ type Props = {
     word: Word;
     isHidden: boolean;
     handleContextMenu: (event: React.MouseEvent<HTMLDivElement, MouseEvent>, word: Word) => void;
+    onClick: (word: Word) => void;
 };
 
-const ListItemCard = ({ word, isHidden, handleContextMenu }: Props) => {
+const ListItemCard = ({ word, isHidden, handleContextMenu, onClick }: Props) => {
     return (
         <div
             className="border-2 border-solid border-gray-400 m-2 w-60 rounded-lg max-h-32 group"
             style={{ minWidth: '200px' }}
             onClick={() => {
-                alert(`${word.english} ${word.japanese}${word.annotation ? '\n' + word.annotation : ''}`);
+                onClick(word);
             }}
             onContextMenu={(e) => {
                 handleContextMenu(e, word);

@@ -26,9 +26,13 @@ const DetailModal: React.FC<Props> = ({ word, isShow, close }) => {
                     <li>
                         {Object.keys(PoSs).map((pos) => {
                             return word?.poss.includes(pos as PoSsType) ? (
-                                <span className="text-mg font-bold mx-2">{PoSs[pos]}</span>
+                                <span className="text-mg font-bold mx-2" key={pos}>
+                                    {PoSs[pos]}
+                                </span>
                             ) : (
-                                <span className="text-mg font-bold mx-2 text-gray-300">{PoSs[pos]}</span>
+                                <span className="text-mg font-bold mx-2 text-gray-300" key={pos}>
+                                    {PoSs[pos]}
+                                </span>
                             );
                         })}
                     </li>

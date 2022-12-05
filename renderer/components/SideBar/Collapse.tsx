@@ -149,7 +149,7 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                         </li>
                     ) : (
                         <li className="overflow-hidden pl-1">
-                            <span className="text-xl font-bold cursor-pointer select-none">{parent}</span>
+                            <span className="text-xl font-bold cursor-pointer select-none whitespace-nowrap">{parent}</span>
                         </li>
                     )}
                 </div>

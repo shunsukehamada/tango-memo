@@ -19,9 +19,8 @@ const PosFilter: React.FC<Props> = ({}) => {
                         return (
                             <li className="mx-2" key={pos}>
                                 <label>
-                                    <input type="checkbox" className="hidden peer" />
                                     <span
-                                        className="font-bold text-lg text-gray-400 select-none shadow-gray-500 p-1 rounded-sm"
+                                        className="font-bold text-lg text-gray-400 select-none shadow-gray-500 p-1 rounded-sm whitespace-nowrap"
                                         style={
                                             filterStates[pos]
                                                 ? {

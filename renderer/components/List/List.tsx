@@ -12,6 +12,7 @@ import DetailModal from '../DetailModal';
 import { PoSs, PoSsType } from '../../pages/register';
 import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
 import { filterContext } from '../Header/FilterProvider';
+import { valueContext } from '../Header/SearchWordsProvider';
 
 export type Word = {
     id: number;
@@ -43,6 +44,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
     const [deleteWord, setDeleteWord] = useState<Word | undefined>(undefined);
     const [isShowDelete, setIsShowDelete] = useState<boolean>(false);
     const filterStates = useContext(filterContext);
+    const searchValue = useContext(valueContext);
     const reorder = (items: Word[], startIndex: number, endIndex: number) => {
         const [removed] = items.splice(startIndex, 1);
         items.splice(endIndex, 0, removed);
@@ -159,22 +161,23 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                                                         {(item.poss.some((pos) => filterStates[pos]) ||
                                                                             Object.keys(PoSs).every(
                                                                                 (pos) => !filterStates[pos]
-                                                                            )) && (
-                                                                            <li key={item.id}>
-                                                                                <ListItem
-                                                                                    word={item}
-                                                                                    isHidden={isHidden}
-                                                                                    index={index}
-                                                                                    handleContextMenu={
-                                                                                        handleContextMenu
-                                                                                    }
-                                                                                    onClick={(word: Word) => {
-                                                                                        setDetailWord(word);
-                                                                                        setIsShowDetail(true);
-                                                                                    }}
-                                                                                />
-                                                                            </li>
-                                                                        )}
+                                                                            )) &&
+                                                                            item.english.startsWith(searchValue) && (
+                                                                                <li key={item.id}>
+                                                                                    <ListItem
+                                                                                        word={item}
+                                                                                        isHidden={isHidden}
+                                                                                        index={index}
+                                                                                        handleContextMenu={
+                                                                                            handleContextMenu
+                                                                                        }
+                                                                                        onClick={(word: Word) => {
+                                                                                            setDetailWord(word);
+                                                                                            setIsShowDetail(true);
+                                                                                        }}
+                                                                                    />
+                                                                                </li>
+                                                                            )}
                                                                     </>
                                                                 );
                                                             })}
@@ -194,15 +197,27 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                 className="flex flex-wrap overflow-y-scroll -mt-3 scrollbar-hide"
                                 style={{ height: '90%' }}
                             >
-                                {items.map((item, index) => (
-                                    <div key={item.id}>
-                                        <ListItemCard
-                                            word={item}
-                                            isHidden={isHidden}
-                                            handleContextMenu={handleContextMenu}
-                                        />
-                                    </div>
-                                ))}
+                                {items.map((item, index) => {
+                                    return (
+                                        <>
+                                            {(item.poss.some((pos) => filterStates[pos]) ||
+                                                Object.keys(PoSs).every((pos) => !filterStates[pos])) &&
+                                                item.english.startsWith(searchValue) && (
+                                                    <div key={item.id}>
+                                                        <ListItemCard
+                                                            word={item}
+                                                            isHidden={isHidden}
+                                                            handleContextMenu={handleContextMenu}
+                                                            onClick={(word: Word) => {
+                                                                setDetailWord(word);
+                                                                setIsShowDetail(true);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                        </>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
