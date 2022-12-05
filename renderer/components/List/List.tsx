@@ -9,7 +9,7 @@ import EditionModal from '../EditionModal';
 import { setWordsContext, wordsContext } from './Providers/WordsProvider';
 import { openedFolderContext } from '../SideBar/Providers/OpenedFolderProvider';
 import DetailModal from '../DetailModal';
-import { PoSs } from '../../pages/register';
+import { PoSs, PoSsType } from '../../pages/register';
 import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
 
 export type Word = {
@@ -17,7 +17,7 @@ export type Word = {
     english: string;
     japanese: string;
     annotation: string;
-    poss: (keyof PoSs)[];
+    poss: PoSsType[];
     folder_id: string;
 };
 

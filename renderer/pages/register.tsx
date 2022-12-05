@@ -8,6 +8,27 @@ import { DirectoryStructure } from '../components/SideBar/SideBar';
 import Suggestion from '../components/Suggestion';
 import { useTheme } from 'next-themes';
 
+export type PoSsType =
+    | 'Noun'
+    | 'Verb'
+    | 'Adjective'
+    | 'Adverb'
+    | 'Conjunction'
+    | 'Pronoun'
+    | 'Preposition'
+    | 'Interjection';
+
+export const PoSs: Readonly<{ [pos in PoSsType]: string }> = {
+    Noun: '名詞',
+    Verb: '動詞',
+    Adjective: '形容詞',
+    Adverb: '副詞',
+    Conjunction: '接続詞',
+    Pronoun: '代名詞',
+    Preposition: '前置詞',
+    Interjection: '感動詞',
+};
+
 type Inputs = {
     english: string;
     japanese: string;
@@ -16,25 +37,14 @@ type Inputs = {
         label: string;
         value: { parent: string; child: string };
     };
-    pos: (keyof PoSs)[];
-};
-
-export type PoSs = {
-    Noun: '名詞';
-    Verb: '動詞';
-    Adjective: '形容詞';
-    Adverb: '副詞';
-    Conjunction: '接続詞';
-    Pronoun: '代名詞';
-    Preposition: '前置詞';
-    Interjection: '感動詞';
+    pos: PoSsType[];
 };
 
 const Register: React.FC = () => {
     const router = useRouter();
     const [isTransitioned, setIsTransitioned] = useState(false);
     const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
-    const [info, setInfo] = useState<{ japanese: string; poss: (keyof PoSs)[] }>({ japanese: '', poss: [] });
+    const [info, setInfo] = useState<{ japanese: string; poss: PoSsType[] }>({ japanese: '', poss: [] });
     const [rows, setRows] = useState<number>(1);
     const animationControl = useAnimationControls();
     const formRef = useRef();
@@ -106,17 +116,6 @@ const Register: React.FC = () => {
         const folder = data.folder;
         reset();
         setValue('folder', folder);
-    };
-
-    const PoSs: PoSs = {
-        Noun: '名詞',
-        Verb: '動詞',
-        Adjective: '形容詞',
-        Adverb: '副詞',
-        Conjunction: '接続詞',
-        Pronoun: '代名詞',
-        Preposition: '前置詞',
-        Interjection: '感動詞',
     };
 
     const options = [

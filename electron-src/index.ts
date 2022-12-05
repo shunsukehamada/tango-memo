@@ -20,23 +20,22 @@ type Word = {
     japanese: string;
 };
 
-type PoSs = {
-    Noun: '名詞';
-    Verb: '動詞';
-    Adjective: '形容詞';
-    Adverb: '副詞';
-    Conjunction: '接続詞';
-    Pronoun: '代名詞';
-    Preposition: '前置詞';
-    Interjection: '感動詞';
-};
+export type PoSsType =
+    | 'Noun'
+    | 'Verb'
+    | 'Adjective'
+    | 'Adverb'
+    | 'Conjunction'
+    | 'Pronoun'
+    | 'Preposition'
+    | 'Interjection';
 
 type Inputs = {
     english: string;
     japanese: string;
     annotation: string;
     folder: Folder;
-    pos: (keyof PoSs)[];
+    pos: PoSsType[];
 };
 
 type Folder = {

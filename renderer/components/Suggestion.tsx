@@ -1,6 +1,6 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { VscTriangleDown } from 'react-icons/vsc';
-import { PoSs } from '../pages/register';
+import { PoSs, PoSsType } from '../pages/register';
 
 type Props = {
     children: ReactNode;
@@ -9,7 +9,7 @@ type Props = {
     setInfo: Dispatch<
         SetStateAction<{
             japanese: string;
-            poss: (keyof PoSs)[];
+            poss: PoSsType[];
         }>
     >;
 };

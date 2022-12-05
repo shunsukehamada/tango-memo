@@ -3,6 +3,7 @@ import { Ref, useCallback, useContext, useEffect, useRef, useState } from 'react
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { RiPencilFill } from 'react-icons/ri';
 import Select from 'react-select';
+import { PoSsType } from '../pages/register';
 import { Word } from './List/List';
 import { editListItemContext } from './List/Providers/EditListItemProvider';
 import { DirectoryStructure } from './SideBar/SideBar';
@@ -12,23 +13,12 @@ type Inputs = {
     japanese: string;
     annotation: string;
     folder: Folder;
-    pos: (keyof PoSs)[];
+    pos: PoSsType[];
 };
 
 type Folder = {
     label: string;
     value: { parent: string; child: string };
-};
-
-type PoSs = {
-    Noun: '名';
-    Verb: '動';
-    Adjective: '形';
-    Adverb: '副';
-    Conjunction: '接';
-    Pronoun: '代';
-    Preposition: '前';
-    Interjection: '感';
 };
 
 type Props = {
@@ -66,7 +56,7 @@ const RegisterForm: React.FC<Props> = ({ word, close }) => {
         setValue,
     } = useForm<Inputs>({
         mode: 'all',
-        defaultValues: { ...word, pos: word?.poss as (keyof PoSs)[] },
+        defaultValues: { ...word, pos: word?.poss as PoSsType[] },
     });
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         global.ipcRenderer.send('edit-word', data, word?.id);
@@ -81,7 +71,7 @@ const RegisterForm: React.FC<Props> = ({ word, close }) => {
         close();
     };
 
-    const PoSs: PoSs = {
+    const PoSs: Readonly<{ [pos in PoSsType]: string }> = {
         Noun: '名',
         Verb: '動',
         Adjective: '形',

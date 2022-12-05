@@ -1,5 +1,5 @@
 import React from 'react';
-import { PoSs } from '../pages/register';
+import { PoSs, PoSsType } from '../pages/register';
 import { Word } from './List/List';
 import Modal from './Modal';
 type Props = {
@@ -8,16 +8,6 @@ type Props = {
     close: () => void;
 };
 const DetailModal: React.FC<Props> = ({ word, isShow, close }) => {
-    const PoSs: PoSs = {
-        Noun: '名詞',
-        Verb: '動詞',
-        Adjective: '形容詞',
-        Adverb: '副詞',
-        Conjunction: '接続詞',
-        Pronoun: '代名詞',
-        Preposition: '前置詞',
-        Interjection: '感動詞',
-    };
     return (
         <Modal isShow={isShow} close={close} h={'50%'} w={'50%'}>
             <div className="text-black text-center flex flex-col justify-around h-full">
@@ -35,7 +25,7 @@ const DetailModal: React.FC<Props> = ({ word, isShow, close }) => {
                 <ul className="flex justify-center">
                     <li>
                         {Object.keys(PoSs).map((pos) => {
-                            return word?.poss.includes(pos as keyof PoSs) ? (
+                            return word?.poss.includes(pos as PoSsType) ? (
                                 <span className="text-mg font-bold mx-2">{PoSs[pos]}</span>
                             ) : (
                                 <span className="text-mg font-bold mx-2 text-gray-300">{PoSs[pos]}</span>
