@@ -575,28 +575,59 @@ ipcMain.on(
     }
 );
 
-ipcMain.handle('get-suggestion', async (_e: IpcMainInvokeEvent, value: string) => {
-    const db = new sqlite3.Database(
-        isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'supplement', 'suggest.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
-    );
-    const rows = await new Promise<{ id: number; english: string }[]>((resolve, reject) => {
-        db.all(
-            'select id, english from words where english like ? limit 5',
-            `${value}%`,
-            (err: Error | null, rows: { id: number; english: string }[]) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(rows);
-            }
+ipcMain.handle(
+    'get-suggestion',
+    async (_e: IpcMainInvokeEvent, value: string): Promise<{ id: number; word: string }[]> => {
+        const db = new sqlite3.Database(
+            isDev
+                ? path.join(
+                      process.env['HOME']!,
+                      'Documents',
+                      'electron',
+                      'tango-memo',
+                      'db',
+                      'supplement',
+                      'suggest.db'
+                  )
+                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
         );
-    });
-    return rows.map((row) => {
-        return { id: row.id, word: row.english };
-    });
-});
+        const exact = await new Promise<{ id: number; word: string } | undefined>((resolve, reject) => {
+            db.get(
+                'select id, english from words where english = ?',
+                value,
+                (err: Error | null, row: { id: number; english: string } | undefined) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    row ? resolve({ id: row.id, word: row.english }) : resolve(undefined);
+                }
+            );
+        });
+        const rows = await new Promise<{ id: number; english: string }[]>((resolve, reject) => {
+            db.all(
+                'select id, english from words where english like ? limit 5',
+                `${value}%`,
+                (err: Error | null, rows: { id: number; english: string }[]) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(rows);
+                }
+            );
+        });
+        if (exact) {
+            const partials = rows
+                .filter((row) => row.id !== exact?.id)
+                .map((row) => {
+                    return { id: row.id, word: row.english };
+                });
+            return [exact, ...partials];
+        }
+        return rows.map((row) => {
+            return { id: row.id, word: row.english };
+        });
+    }
+);
 
 ipcMain.handle('get-word-info', async (_e: IpcMainInvokeEvent, id: number) => {
     const db = new sqlite3.Database(
