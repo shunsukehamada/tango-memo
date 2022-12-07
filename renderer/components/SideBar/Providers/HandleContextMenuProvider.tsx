@@ -5,18 +5,35 @@ type Props = {
     children: ReactNode;
 };
 
-type ValueType = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => void;
+type ParentType = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string) => void;
+type ChildType = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child: string) => void;
 
-export const handleContextMenuContext = createContext<ValueType>(() => {});
+export const handleParentContextMenuContext = createContext<ParentType>(() => {});
+export const handleChildContextMenuContext = createContext<ChildType>(() => {});
 
 const HandleContextMenuProvider: React.FC<Props> = ({ children }) => {
-    const MENU_ID = 'directory';
-    const { show } = useContextMenu({
-        id: MENU_ID,
-    });
+    const showParent = useContextMenu({
+        id: 'parent-directory',
+    }).show;
 
-    const handleContextMenu = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string, child?: string) => {
-        show({
+    const showChild = useContextMenu({
+        id: 'child-directory',
+    }).show;
+
+    const handleParentContextMenu = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, parent: string) => {
+        showParent({
+            event,
+            props: {
+                parent,
+            },
+        });
+    };
+    const handleChildContextMenu = (
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+        parent: string,
+        child: string
+    ) => {
+        showChild({
             event,
             props: {
                 parent,
@@ -24,6 +41,12 @@ const HandleContextMenuProvider: React.FC<Props> = ({ children }) => {
             },
         });
     };
-    return <handleContextMenuContext.Provider value={handleContextMenu}>{children}</handleContextMenuContext.Provider>;
+    return (
+        <handleParentContextMenuContext.Provider value={handleParentContextMenu}>
+            <handleChildContextMenuContext.Provider value={handleChildContextMenu}>
+                {children}
+            </handleChildContextMenuContext.Provider>
+        </handleParentContextMenuContext.Provider>
+    );
 };
 export default HandleContextMenuProvider;

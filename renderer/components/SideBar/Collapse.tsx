@@ -2,7 +2,7 @@ import { FormEvent, useContext, useEffect, useRef } from 'react';
 import { directoryContext, setDirectoryContext } from './Providers/DirectoryProvider';
 import { folderValueContext, setFolderValueContext } from './Providers/EditFolderValueProvider';
 import { getWordsContext } from './Providers/GetWordsProvider';
-import { handleContextMenuContext } from './Providers/HandleContextMenuProvider';
+import { handleChildContextMenuContext, handleParentContextMenuContext } from './Providers/HandleContextMenuProvider';
 import { editFolderContext, setEditFolderContext } from './Providers/HandleEditFolderProvider';
 import { handleIsOpenStatesContext } from './Providers/HandleIsOpenStatesProvider';
 import { handleSelectContext } from './Providers/HandleSelectProvider';
@@ -32,7 +32,8 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
     const setNewFolderNameInputValue = useContext(setNewFolderNameInputValueContext);
     const isCreatingNewFolder = useContext(isCreatingNewFolderContext);
     const setIsCreatingNewFolder = useContext(setIsCreatingNewFolderContext);
-    const handleContextMenu = useContext(handleContextMenuContext);
+    const handleChildContextMenu = useContext(handleChildContextMenuContext);
+    const handleParentContextMenu = useContext(handleParentContextMenuContext);
     const setOpenedFolder = useContext(setOpenedFolderContext);
     const { isEditingFolder, editingFolder } = useContext(editFolderContext);
     const setEditFolder = useContext(setEditFolderContext);
@@ -105,7 +106,7 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                 className="w-full"
                 onContextMenu={(e) => {
                     if (isEditingFolder && !editingFolder.child && editingFolder.parent === parent) return;
-                    handleContextMenu(e, parent);
+                    handleParentContextMenu(e, parent);
                 }}
             >
                 <div
@@ -207,7 +208,7 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                                     <div
                                         key={child}
                                         className="pl-4 my-1 flex before:content-['>']"
-                                        onClick={(e) => {
+                                        onClick={async (e) => {
                                             e.stopPropagation();
                                             setIsCreatingNewFolder(false);
                                             getWords(parent, child);
@@ -225,7 +226,7 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                                         }}
                                         onContextMenu={(e) => {
                                             if (isEditingFolder && editingFolder.child === child) return;
-                                            handleContextMenu(e, parent, child);
+                                            handleChildContextMenu(e, parent, child);
                                         }}
                                         style={
                                             isSelected[parent]?.children[index]

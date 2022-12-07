@@ -14,6 +14,7 @@ import {
 import { isCreatingNewFolderContext, setIsCreatingNewFolderContext } from './Providers/isCreatingNewFolderProvider';
 import { handleEditFolderContext, setEditFolderContext } from './Providers/HandleEditFolderProvider';
 import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
+import SetUrlModal from '../SetUrlModal';
 
 export type DirectoryStructure = {
     readonly parent: string;
@@ -53,6 +54,10 @@ const SideBar: React.FC = () => {
     const [isShow, setIsShow] = useState<boolean>(false);
     const [modalResolve, setModalResolve] = useState<ModalResolveType | undefined>();
     const [deleteDirectory, setDeleteDirectory] = useState<string>('');
+    const [isShowSetUrlModal, setIsShowSetUrlModal] = useState<boolean>(false);
+    const [setUrlFolder, setSetUrlFolder] = useState<{ parent: string; child: string }>(
+        {} as { parent: string; child: string }
+    );
 
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
@@ -127,15 +132,13 @@ const SideBar: React.FC = () => {
         setDirectoryStructure(newDirectoryStructure);
     };
 
-    const handleItemClick = async ({ id, props }: ItemParams<{ parent: string; child?: string }>) => {
+    const handleParentItemClick = async ({ id, props }: ItemParams<{ parent: string }>) => {
         if (id === 'delete') {
-            setDeleteDirectory(props.child ? `${props.parent}/${props.child}` : props.parent);
+            setDeleteDirectory(props.parent);
             const ok = await handleConfirm(setIsShow, setModalResolve);
             if (ok) {
-                props.child
-                    ? global.ipcRenderer.send('delete-child-folder', props)
-                    : global.ipcRenderer.send('delete-parent-folder', props);
-                deleteFolder(props.parent, props.child);
+                global.ipcRenderer.send('delete-parent-folder', props);
+                deleteFolder(props.parent);
             }
             setDeleteDirectory('');
             return;
@@ -144,6 +147,31 @@ const SideBar: React.FC = () => {
             handleEditFolder(props);
             return;
         }
+    };
+    const handleChildItemClick = async ({ id, props }: ItemParams<{ parent: string; child: string }>) => {
+        if (id === 'delete') {
+            setDeleteDirectory(`${props.parent}/${props.child}`);
+            const ok = await handleConfirm(setIsShow, setModalResolve);
+            if (ok) {
+                global.ipcRenderer.send('delete-child-folder', props);
+                deleteFolder(props.parent, props.child);
+            }
+            setDeleteDirectory('');
+            return;
+        }
+        if (id === 'url') {
+            setUrl(props);
+            return;
+        }
+        if (id === 'edit') {
+            handleEditFolder(props);
+            return;
+        }
+        return;
+    };
+    const setUrl = ({ parent, child }: { parent: string; child: string }) => {
+        setIsShowSetUrlModal(true);
+        setSetUrlFolder({ parent, child });
     };
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
@@ -155,6 +183,13 @@ const SideBar: React.FC = () => {
                 resolve={modalResolve}
                 deleteValue={deleteDirectory}
             />
+            <SetUrlModal
+                isShow={isShowSetUrlModal}
+                close={() => {
+                    setIsShowSetUrlModal(false);
+                }}
+                folder={setUrlFolder}
+            ></SetUrlModal>
             <div
                 className="grow-0 shrink-0 flex border-r-2 border-solid border-gray-400 flex-row"
                 ref={sidebarRef}
@@ -266,12 +301,26 @@ const SideBar: React.FC = () => {
                 <div className="w-1 h-full group-hover:bg-blue-500 mx-auto"></div>
             </div>
             <div className="flex-1 flex flex-col h-full max-h-full z-10"></div>
-            <Menu id={'directory'}>
-                <Item id="delete" onClick={handleItemClick}>
+            <Menu id={'parent-directory'}>
+                <Item id="delete" onClick={handleParentItemClick}>
                     <VscTrash />
                     <span className="ml-3">削除...</span>
                 </Item>
-                <Item id="edit" onClick={handleItemClick}>
+                <Item id="edit" onClick={handleParentItemClick}>
+                    <VscEdit />
+                    <span className="ml-3">編集...</span>
+                </Item>
+            </Menu>
+            <Menu id={'child-directory'}>
+                <Item id="delete" onClick={handleChildItemClick}>
+                    <VscTrash />
+                    <span className="ml-3">削除...</span>
+                </Item>
+                <Item id="url" onClick={handleChildItemClick}>
+                    <VscEdit />
+                    <span className="ml-3">urlを登録...</span>
+                </Item>
+                <Item id="edit" onClick={handleChildItemClick}>
                     <VscEdit />
                     <span className="ml-3">編集...</span>
                 </Item>

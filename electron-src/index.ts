@@ -64,14 +64,14 @@ app.on('ready', async () => {
         },
     });
 
-    const handleUrlOpen = (e: Electron.Event, url: string)=>{
-        if( url.match(/^http/)){
-          e.preventDefault()
-          shell.openExternal(url)
+    const handleUrlOpen = (e: Electron.Event, url: string) => {
+        if (url.match(/^http/)) {
+            e.preventDefault();
+            shell.openExternal(url);
         }
-      }
-      mainWindow.webContents.on('will-navigate', handleUrlOpen);
-      mainWindow.webContents.on('new-window', handleUrlOpen);
+    };
+    mainWindow.webContents.on('will-navigate', handleUrlOpen);
+    mainWindow.webContents.on('new-window', handleUrlOpen);
 
     const url = isDev
         ? 'http://localhost:8000/'
@@ -689,4 +689,42 @@ ipcMain.handle('get-word-info', async (_e: IpcMainInvokeEvent, id: number) => {
         })
     );
     return { japanese, poss };
+});
+
+ipcMain.on('set-url', async (_e: Electron.IpcMainEvent, folder: { parent: string; child: string }, url: string) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    const parentId: number = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from parent_folders where name = ?',
+            folder.parent,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    const folderId: number = await new Promise<number>((resolve, reject) => {
+        db.get(
+            'select id from folders where parent_id = ? and name = ?',
+            parentId,
+            folder.child,
+            (err: Error | null, row: { id: number }) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(row.id);
+            }
+        );
+    });
+    db.run('update folders set url = ? where id = ?', [url, folderId], (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
 });

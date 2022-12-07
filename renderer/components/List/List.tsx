@@ -171,13 +171,13 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                                         <ul>
                                                             {items.map((item, index) => {
                                                                 return (
-                                                                    <>
+                                                                    <div key={item.id}>
                                                                         {(item.poss.some((pos) => filterStates[pos]) ||
                                                                             Object.keys(PoSs).every(
                                                                                 (pos) => !filterStates[pos]
                                                                             )) &&
                                                                             item.english.startsWith(searchValue) && (
-                                                                                <li key={item.id}>
+                                                                                <li>
                                                                                     <ListItem
                                                                                         word={item}
                                                                                         isHidden={isHidden}
@@ -192,7 +192,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                                                                     />
                                                                                 </li>
                                                                             )}
-                                                                    </>
+                                                                    </div>
                                                                 );
                                                             })}
                                                         </ul>
@@ -213,11 +213,11 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                             >
                                 {items.map((item, index) => {
                                     return (
-                                        <>
+                                        <div key={item.id}>
                                             {(item.poss.some((pos) => filterStates[pos]) ||
                                                 Object.keys(PoSs).every((pos) => !filterStates[pos])) &&
                                                 item.english.startsWith(searchValue) && (
-                                                    <div key={item.id}>
+                                                    <div>
                                                         <ListItemCard
                                                             word={item}
                                                             isHidden={isHidden}
@@ -229,7 +229,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                                         />
                                                     </div>
                                                 )}
-                                        </>
+                                        </div>
                                     );
                                 })}
                             </div>
