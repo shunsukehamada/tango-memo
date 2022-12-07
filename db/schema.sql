@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS folders (
     name TEXT NOT NULL,
     parent_id INTEGER NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    url TEXT,
     UNIQUE (name, parent_id) ON CONFLICT REPLACE
 );
 

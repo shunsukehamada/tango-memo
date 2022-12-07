@@ -125,8 +125,22 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
             <div className="flex h-full">
                 <div className="flex-1">
                     {openedFolder && (
-                        <div className="text-lg font-bold mt-1">
-                            {openedFolder.parent}&gt;{openedFolder.folder}
+                        <div className="text-lg font-bold mt-1 flex justify-between">
+                            <div className="ml-5">
+                                <span>
+                                    {openedFolder.parent}
+                                    <span className="mx-3">&gt;</span>
+                                    {openedFolder.folder}
+                                </span>
+                            </div>
+                            {openedFolder.url && (
+                                <div className="mr-5">
+                                    <span>外部リンク: </span>
+                                    <a href={openedFolder.url}>
+                                        <span>{openedFolder.url}</span>
+                                    </a>
+                                </div>
+                            )}
                         </div>
                     )}
                     {view === 'list' ? (
@@ -225,11 +239,11 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                 <Menu id={MENU_ID}>
                     <Item id="delete" onClick={handleItemClick}>
                         <VscTrash />
-                        削除
+                        <span className="ml-3">削除...</span>
                     </Item>
                     <Item id="edit" onClick={handleItemClick}>
                         <VscEdit />
-                        編集
+                        <span className="ml-3">編集...</span>
                     </Item>
                 </Menu>
             </div>

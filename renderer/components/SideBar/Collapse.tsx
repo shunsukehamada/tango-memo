@@ -149,7 +149,9 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                         </li>
                     ) : (
                         <li className="overflow-hidden pl-1">
-                            <span className="text-xl font-bold cursor-pointer select-none whitespace-nowrap">{parent}</span>
+                            <span className="text-xl font-bold cursor-pointer select-none whitespace-nowrap">
+                                {parent}
+                            </span>
                         </li>
                     )}
                 </div>
@@ -212,6 +214,11 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                                             setOpenedFolder({
                                                 parent: parent,
                                                 folder: child,
+                                                url: directoryStructure
+                                                    .find((directory) => directory.parent === parent)
+                                                    .urls.find((url) => {
+                                                        return url.folderName === child;
+                                                    }).url,
                                             });
                                             handleChildrenSelect(parent, index);
                                             setEditFolder({ isEditingFolder: false });

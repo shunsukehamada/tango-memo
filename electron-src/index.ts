@@ -3,7 +3,7 @@ import path, { join } from 'path';
 import { format } from 'url';
 
 // Packages
-import { BrowserWindow, app, ipcMain } from 'electron';
+import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import isDev from 'electron-is-dev';
 import prepareNext from 'electron-next';
 import sqlite3 from 'sqlite3';
@@ -12,6 +12,13 @@ import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
 type DirectoryStructure = {
     parent: string;
     children: string[];
+    urls: URL[];
+};
+
+type URL = {
+    folderId: number;
+    folderName: string;
+    url: string;
 };
 
 type Word = {
@@ -56,6 +63,15 @@ app.on('ready', async () => {
             preload: join(__dirname, 'preload.js'),
         },
     });
+
+    const handleUrlOpen = (e: Electron.Event, url: string)=>{
+        if( url.match(/^http/)){
+          e.preventDefault()
+          shell.openExternal(url)
+        }
+      }
+      mainWindow.webContents.on('will-navigate', handleUrlOpen);
+      mainWindow.webContents.on('new-window', handleUrlOpen);
 
     const url = isDev
         ? 'http://localhost:8000/'
@@ -110,18 +126,23 @@ ipcMain.handle('get-all-folders', async () => {
     });
     const directoryStructure: DirectoryStructure[] = [];
     for (const parentFolder of parentFolders) {
-        const folder: { id: number; name: string; parent_id: number }[] = await new Promise((resolve, reject) => {
-            db.all('select * from folders where parent_id = ?', parentFolder.id, (err, rows) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(rows);
-            });
-        });
+        const folders: { id: number; name: string; parent_id: number; url: string }[] = await new Promise(
+            (resolve, reject) => {
+                db.all('select * from folders where parent_id = ?', parentFolder.id, (err, rows) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(rows);
+                });
+            }
+        );
         const directory: DirectoryStructure = {
             parent: parentFolder.name,
-            children: folder.map((folder) => {
+            children: folders.map((folder) => {
                 return folder.name;
+            }),
+            urls: folders.map((folder) => {
+                return { folderId: folder.id, folderName: folder.name, url: folder.url };
             }),
         };
         directoryStructure.push(directory);

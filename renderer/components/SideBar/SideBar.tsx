@@ -18,6 +18,13 @@ import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
 export type DirectoryStructure = {
     readonly parent: string;
     readonly children: string[];
+    readonly urls?: URL[];
+};
+
+export type URL = {
+    folderId: number;
+    folderName: string;
+    url: string;
 };
 
 export type isSelectedType = {
@@ -262,11 +269,11 @@ const SideBar: React.FC = () => {
             <Menu id={'directory'}>
                 <Item id="delete" onClick={handleItemClick}>
                     <VscTrash />
-                    削除
+                    <span className="ml-3">削除...</span>
                 </Item>
                 <Item id="edit" onClick={handleItemClick}>
                     <VscEdit />
-                    編集
+                    <span className="ml-3">編集...</span>
                 </Item>
             </Menu>
         </div>

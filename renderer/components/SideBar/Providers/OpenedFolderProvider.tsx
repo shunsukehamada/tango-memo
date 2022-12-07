@@ -7,12 +7,14 @@ type Props = {
 type openedFolderContextValueType = {
     parent: string;
     folder: string;
+    url: string;
 };
 
 type setOpenedFolderContextValueType = React.Dispatch<
     React.SetStateAction<{
         parent: string;
         folder: string;
+        url: string;
     }>
 >;
 
@@ -20,7 +22,7 @@ export const openedFolderContext = createContext<openedFolderContextValueType>({
 export const setOpenedFolderContext = createContext<setOpenedFolderContextValueType>(() => {});
 
 const OpenedFolderProvider: React.FC<Props> = ({ children }) => {
-    const [openedFolder, setOpenedFolder] = useState<{ parent: string; folder: string } | null>(null);
+    const [openedFolder, setOpenedFolder] = useState<{ parent: string; folder: string; url: string } | null>(null);
     return (
         <openedFolderContext.Provider value={openedFolder}>
             <setOpenedFolderContext.Provider value={setOpenedFolder}>{children}</setOpenedFolderContext.Provider>
