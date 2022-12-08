@@ -27,10 +27,10 @@ const Layout = () => {
             <WordsProvider>
                 <FilterProvider>
                     <SearchWordsProvider>
-                        <Header view={view} setView={setView} isHidden={isHidden} setIsHidden={setIsHidden} />
-                        <div className="flex overflow-y-hidden">
-                            <div className="h-screen flex items-center">
-                                <DirectoryProvider>
+                        <DirectoryProvider>
+                            <Header view={view} setView={setView} isHidden={isHidden} setIsHidden={setIsHidden} />
+                            <div className="flex overflow-y-hidden">
+                                <div className="h-screen flex items-center">
                                     <GetWordsProvider>
                                         <IsSelectedProvider>
                                             <IsOpenStatesProvider>
@@ -52,13 +52,13 @@ const Layout = () => {
                                             </IsOpenStatesProvider>
                                         </IsSelectedProvider>
                                     </GetWordsProvider>
-                                </DirectoryProvider>
-                            </div>
+                                </div>
 
-                            <div className="flex-1">
-                                <List view={view} setView={setView} isHidden={isHidden} />
+                                <div className="flex-1">
+                                    <List view={view} setView={setView} isHidden={isHidden} />
+                                </div>
                             </div>
-                        </div>
+                        </DirectoryProvider>
                     </SearchWordsProvider>
                 </FilterProvider>
             </WordsProvider>

@@ -1,28 +1,29 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
+import { ChildDirectory, ParentDirectory } from '../SideBar';
 import { setFolderValueContext } from './EditFolderValueProvider';
 
 type Props = {
     children: ReactNode;
 };
 
+type Directory = ParentDirectory | ChildDirectory;
+
 type EditFolderState = {
     isEditingFolder: boolean;
-    editingFolder?: Folder;
+    editingFolder?: Directory;
 };
-
-type Folder = { parent: string; child?: string };
 
 export const editFolderContext = createContext<EditFolderState>({ isEditingFolder: false });
 export const setEditFolderContext = createContext<React.Dispatch<React.SetStateAction<EditFolderState>>>(() => {});
-export const handleEditFolderContext = createContext<(folder: Folder) => void>(() => {});
+export const handleEditFolderContext = createContext<(folder: Directory) => void>(() => {});
 
 const HandleEditFolderProvider: React.FC<Props> = ({ children }) => {
     const [editFolder, setEditFolder] = useState<EditFolderState>({ isEditingFolder: false });
     const setFolderValue = useContext(setFolderValueContext);
 
-    const handleEditFolder = (folder: Folder): void => {
+    const handleEditFolder = (folder: Directory): void => {
         setEditFolder({ isEditingFolder: true, editingFolder: folder });
-        setFolderValue(folder.child ? folder.child : folder.parent);
+        setFolderValue(folder.type === 'child' ? folder.name : folder.name);
     };
 
     return (

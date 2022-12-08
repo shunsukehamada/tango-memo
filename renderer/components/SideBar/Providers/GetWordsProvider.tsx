@@ -6,12 +6,12 @@ type Props = {
     children: ReactNode;
 };
 
-export const getWordsContext = createContext<(parentFolder: string, folder: string) => Promise<void>>(async () => {});
+export const getWordsContext = createContext<(id: number) => Promise<void>>(async () => {});
 
 const GetWordsProvider: React.FC<Props> = ({ children }) => {
     const setWords = useContext(setWordsContext);
-    const getWords = async (parentFolder: string, folder: string): Promise<void> => {
-        const words: Word[] = await global.ipcRenderer.invoke('get-words', parentFolder, folder);
+    const getWords = async (id: number): Promise<void> => {
+        const words: Word[] = await global.ipcRenderer.invoke('get-words', id);
         setWords(words);
     };
     return <getWordsContext.Provider value={getWords}>{children}</getWordsContext.Provider>;

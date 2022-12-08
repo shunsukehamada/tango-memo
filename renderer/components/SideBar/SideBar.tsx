@@ -16,10 +16,11 @@ import { handleEditFolderContext, setEditFolderContext } from './Providers/Handl
 import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
 import SetUrlModal from '../SetUrlModal';
 
+export type ChildDirectory = { type: 'child'; id: number | undefined; name: string; parentId: number; url: string };
+export type ParentDirectory = { type: 'parent'; id: number | undefined; name: string };
 export type DirectoryStructure = {
-    readonly parent: string;
-    readonly children: string[];
-    readonly urls?: URL[];
+    parent: ParentDirectory;
+    children: ChildDirectory[];
 };
 
 export type URL = {
@@ -29,11 +30,11 @@ export type URL = {
 };
 
 export type isSelectedType = {
-    [parent: DirectoryStructure['parent']]: { parent: boolean; children: boolean[] };
+    [parent: string]: { parent: boolean; children: boolean[] };
 };
 
 export type isOpenStatesType = {
-    [parent: DirectoryStructure['parent']]: boolean;
+    [parent: string]: boolean;
 };
 
 const SideBar: React.FC = () => {
@@ -55,9 +56,7 @@ const SideBar: React.FC = () => {
     const [modalResolve, setModalResolve] = useState<ModalResolveType | undefined>();
     const [deleteDirectory, setDeleteDirectory] = useState<string>('');
     const [isShowSetUrlModal, setIsShowSetUrlModal] = useState<boolean>(false);
-    const [setUrlFolder, setSetUrlFolder] = useState<{ parent: string; child: string }>(
-        {} as { parent: string; child: string }
-    );
+    const [setUrlFolder, setSetUrlFolder] = useState<ChildDirectory>({} as ChildDirectory);
 
     const sidebarRef = useRef(null);
     const [isResizing, setIsResizing] = useState(false);
@@ -94,7 +93,7 @@ const SideBar: React.FC = () => {
                     return directory.parent === parent;
                 }).children.length
             ).fill(false);
-            isSelectedObject[parent] = { parent: false, children };
+            isSelectedObject[parent.name] = { parent: false, children };
         }
         setIsSelected(isSelectedObject);
     }, [directoryStructure]);
@@ -116,62 +115,68 @@ const SideBar: React.FC = () => {
         setIsOpenStates(newStates);
     };
 
-    const deleteFolder = (parent: string, child?: string) => {
-        if (!child) {
-            const newDirectoryStructure = [...directoryStructure].filter((directory) => directory.parent !== parent);
+    const deleteFolder = (deletedDirectory: ParentDirectory | ChildDirectory) => {
+        if (deletedDirectory.type === 'parent') {
+            const newDirectoryStructure = [...directoryStructure].filter((directory) => {
+                return directory.parent.id !== deletedDirectory.id;
+            });
             setDirectoryStructure(newDirectoryStructure);
             return;
         }
         const newDirectoryStructure: DirectoryStructure[] = [...directoryStructure].map((directory) => {
-            if (directory.parent !== parent) return directory;
+            if (directory.parent.id !== deletedDirectory.parentId) return directory;
 
-            const deletedChildren = directory.children.filter((_child) => _child !== child);
+            const deletedChildren = directory.children.filter((_child) => _child.name !== deletedDirectory.name);
 
-            return { parent: directory.parent, children: deletedChildren };
+            return { ...directory, children: deletedChildren };
         });
         setDirectoryStructure(newDirectoryStructure);
     };
 
-    const handleParentItemClick = async ({ id, props }: ItemParams<{ parent: string }>) => {
+    const handleParentItemClick = async ({ id, props }: ItemParams<{ directory: ParentDirectory }>) => {
         if (id === 'delete') {
-            setDeleteDirectory(props.parent);
+            setDeleteDirectory(props.directory.name);
             const ok = await handleConfirm(setIsShow, setModalResolve);
             if (ok) {
-                global.ipcRenderer.send('delete-parent-folder', props);
-                deleteFolder(props.parent);
+                global.ipcRenderer.send('delete-parent-folder', props.directory);
+                deleteFolder(props.directory);
             }
             setDeleteDirectory('');
             return;
         }
         if (id === 'edit') {
-            handleEditFolder(props);
+            handleEditFolder(props.directory);
             return;
         }
     };
-    const handleChildItemClick = async ({ id, props }: ItemParams<{ parent: string; child: string }>) => {
+    const handleChildItemClick = async ({ id, props }: ItemParams<{ directory: ChildDirectory }>) => {
         if (id === 'delete') {
-            setDeleteDirectory(`${props.parent}/${props.child}`);
+            setDeleteDirectory(
+                `${
+                    directoryStructure.find((directory) => directory.parent.id === props.directory.parentId).parent.name
+                }/${props.directory.name}`
+            );
             const ok = await handleConfirm(setIsShow, setModalResolve);
             if (ok) {
-                global.ipcRenderer.send('delete-child-folder', props);
-                deleteFolder(props.parent, props.child);
+                global.ipcRenderer.send('delete-child-folder', props.directory);
+                deleteFolder(props.directory);
             }
             setDeleteDirectory('');
             return;
         }
         if (id === 'url') {
-            setUrl(props);
+            setUrl(props.directory);
             return;
         }
         if (id === 'edit') {
-            handleEditFolder(props);
+            handleEditFolder(props.directory);
             return;
         }
         return;
     };
-    const setUrl = ({ parent, child }: { parent: string; child: string }) => {
+    const setUrl = (directory: ChildDirectory) => {
         setIsShowSetUrlModal(true);
-        setSetUrlFolder({ parent, child });
+        setSetUrlFolder(directory);
     };
     return (
         <div className="rounded-tr-sm rounded-br-sm flex flex-row h-full  relative">
@@ -254,12 +259,12 @@ const SideBar: React.FC = () => {
                                 }}
                             >
                                 <form
-                                    onSubmit={(e) => {
+                                    onSubmit={async (e) => {
                                         e.preventDefault();
                                         if (
                                             directoryStructure
                                                 .map((directory) => {
-                                                    return directory.parent;
+                                                    return directory.parent.name;
                                                 })
                                                 .includes(newFolderNameInputValue) ||
                                             newFolderNameInputValue === ''
@@ -267,11 +272,23 @@ const SideBar: React.FC = () => {
                                             return;
                                         }
                                         const newStates = [...directoryStructure];
-                                        newStates.push({ parent: newFolderNameInputValue, children: [] });
+                                        newStates.push({
+                                            parent: { name: newFolderNameInputValue, id: undefined, type: 'parent' },
+                                            children: [],
+                                        });
                                         setDirectoryStructure(newStates);
                                         setNewFolderNameInputValue('');
                                         setIsCreatingNewFolder(false);
-                                        global.ipcRenderer.send('create-new-parent-folder', newFolderNameInputValue);
+                                        const status = (await global.ipcRenderer.invoke(
+                                            'create-new-parent-folder',
+                                            newFolderNameInputValue
+                                        )) as number;
+                                        if (status === 201) {
+                                            const allFolders = (await global.ipcRenderer.invoke(
+                                                'get-all-folders'
+                                            )) as DirectoryStructure[];
+                                            setDirectoryStructure(allFolders);
+                                        }
                                     }}
                                     className="w-full m-2"
                                 >

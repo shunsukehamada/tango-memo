@@ -1,28 +1,15 @@
 import React, { createContext, ReactNode, useState } from 'react';
+import { ChildDirectory } from '../SideBar';
 
 type Props = {
     children: ReactNode;
 };
 
-type openedFolderContextValueType = {
-    parent: string;
-    folder: string;
-    url: string;
-};
-
-type setOpenedFolderContextValueType = React.Dispatch<
-    React.SetStateAction<{
-        parent: string;
-        folder: string;
-        url: string;
-    }>
->;
-
-export const openedFolderContext = createContext<openedFolderContextValueType>({} as openedFolderContextValueType);
-export const setOpenedFolderContext = createContext<setOpenedFolderContextValueType>(() => {});
+export const openedFolderContext = createContext<ChildDirectory | undefined>(undefined);
+export const setOpenedFolderContext = createContext<React.Dispatch<React.SetStateAction<ChildDirectory>>>(() => {});
 
 const OpenedFolderProvider: React.FC<Props> = ({ children }) => {
-    const [openedFolder, setOpenedFolder] = useState<{ parent: string; folder: string; url: string } | null>(null);
+    const [openedFolder, setOpenedFolder] = useState<ChildDirectory | undefined>(undefined);
     return (
         <openedFolderContext.Provider value={openedFolder}>
             <setOpenedFolderContext.Provider value={setOpenedFolder}>{children}</setOpenedFolderContext.Provider>

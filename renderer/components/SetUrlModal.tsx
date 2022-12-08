@@ -1,25 +1,31 @@
 import React, { useContext, useState } from 'react';
 import Modal from './Modal';
+import { setDirectoryContext } from './SideBar/Providers/DirectoryProvider';
+import { ChildDirectory, DirectoryStructure } from './SideBar/SideBar';
 
 type Props = {
     isShow: boolean;
     close: () => void;
-    folder: {
-        parent: string;
-        child: string;
-    };
+    folder: ChildDirectory;
 };
 
 const SetUrlModal: React.FC<Props> = ({ isShow, close, folder }) => {
     const [value, setValue] = useState<string>('');
+    const setDirectoryStructure = useContext(setDirectoryContext);
     return (
         <Modal isShow={isShow} close={close} h="25%" w={'40%'}>
             <div className="text-black h-full w-full">
                 <form
                     onSubmit={async (e) => {
                         e.preventDefault();
-                        global.ipcRenderer.send('set-url', folder, value);
                         close();
+                        const status = await global.ipcRenderer.invoke('set-url', folder, value);
+                        if (status === 201) {
+                            const allFolders = (await global.ipcRenderer.invoke(
+                                'get-all-folders'
+                            )) as DirectoryStructure[];
+                            setDirectoryStructure(allFolders);
+                        }
                     }}
                     className="flex flex-col justify-evenly h-full"
                 >

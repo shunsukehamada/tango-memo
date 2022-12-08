@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import { RiPencilFill } from 'react-icons/ri';
-import { DirectoryStructure } from '../components/SideBar/SideBar';
+import { ChildDirectory, DirectoryStructure } from '../components/SideBar/SideBar';
 import Suggestion from '../components/Suggestion';
 import { useTheme } from 'next-themes';
 
@@ -35,7 +35,7 @@ type Inputs = {
     annotation: string;
     folder: {
         label: string;
-        value: { parent: string; child: string };
+        value: ChildDirectory;
     };
     pos: PoSsType[];
 };
@@ -121,12 +121,13 @@ const Register: React.FC = () => {
     const options = [
         ...directoryStructureState.map((directory) => {
             return {
-                label: directory.parent,
-                options: [
-                    ...directory.children.map((folder) => {
-                        return { label: folder, value: { parent: directory.parent, child: folder } };
-                    }),
-                ],
+                label: directory.parent.name,
+                options: [...directory.children].map((folder) => {
+                    return {
+                        label: folder.name,
+                        value: folder,
+                    };
+                }),
             };
         }),
     ];

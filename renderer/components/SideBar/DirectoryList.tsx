@@ -8,10 +8,10 @@ const DirectoryList: React.FC = () => {
         <div>
             {directoryStructure.map((directory, index) => {
                 return (
-                    <div key={directory.parent} className="w-full">
+                    <div key={index} className="w-full">
                         <div className="pl-1 pt-3 overflow-hidden flex flex-col items-start">
                             <ul className="w-full">
-                                <Collapse index={index} parent={directory.parent} />
+                                <Collapse index={index} parent={directory.parent?.name} />
                             </ul>
                         </div>
                     </div>

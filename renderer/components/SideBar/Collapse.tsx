@@ -14,6 +14,7 @@ import {
     setNewFolderNameInputValueContext,
 } from './Providers/NewFolderNameInputValueProvider';
 import { setOpenedFolderContext } from './Providers/OpenedFolderProvider';
+import { DirectoryStructure } from './SideBar';
 
 type Props = {
     index: number;
@@ -45,39 +46,41 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
         if (folderValue === '') {
             return;
         }
-        if (!editingFolder.child) {
+        if (editingFolder.type === 'parent') {
             if (
                 [...directoryStructure]
                     .map((directory) => directory.parent)
-                    .filter((parent) => parent !== editingFolder.parent)
+                    .filter((parent) => parent.id !== editingFolder.id)
+                    .map((parent) => parent.name)
                     .includes(folderValue)
             ) {
                 return;
             }
             const newStates = [...directoryStructure].map((directory) => {
-                if (directory.parent === editingFolder.parent) {
-                    return { ...directory, parent: folderValue };
+                if (directory.parent.id === editingFolder.id) {
+                    return { ...directory, parent: { ...directory.parent, name: folderValue } };
                 }
                 return directory;
             });
-            global.ipcRenderer.send('change-parent-folder', editingFolder, folderValue);
+            global.ipcRenderer.send('change-parent-folder', editingFolder.id, folderValue);
             setDirectoryStructure(newStates);
         } else {
             if (
                 [...directoryStructure]
-                    .find((directory) => directory.parent === editingFolder.parent)
-                    .children.filter((child) => child !== editingFolder.child)
+                    .find((directory) => directory.parent.id === editingFolder.parentId)
+                    .children.filter((child) => child.id !== editingFolder.id)
+                    .map((child) => child.name)
                     .includes(folderValue)
             ) {
                 return;
             }
             const newStates = [...directoryStructure].map((directory) => {
-                if (directory.parent === editingFolder.parent) {
+                if (directory.parent.id === editingFolder.parentId) {
                     return {
                         ...directory,
                         children: directory.children.map((child) => {
-                            if (child === editingFolder.child) {
-                                return folderValue;
+                            if (child.id === editingFolder.id) {
+                                return { ...editingFolder, name: folderValue };
                             }
                             return child;
                         }),
@@ -85,7 +88,7 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                 }
                 return directory;
             });
-            global.ipcRenderer.send('change-child-folder', editingFolder, folderValue);
+            global.ipcRenderer.send('change-child-folder', editingFolder.id, folderValue);
             setDirectoryStructure(newStates);
         }
         setEditFolder({ isEditingFolder: false });
@@ -100,13 +103,17 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
             <div
                 onClick={(e) => {
                     e.stopPropagation();
-                    handleIsOpenStates(parent);
+                    parent;
+                    handleIsOpenStates(directoryStructure.find((directory) => directory.parent.name === parent).parent);
                     setEditFolder({ isEditingFolder: false });
                 }}
                 className="w-full"
                 onContextMenu={(e) => {
-                    if (isEditingFolder && !editingFolder.child && editingFolder.parent === parent) return;
-                    handleParentContextMenu(e, parent);
+                    if (isEditingFolder && editingFolder.type === 'parent' && editingFolder.name === parent) return;
+                    handleParentContextMenu(
+                        e,
+                        directoryStructure.find((directory) => directory.parent.name === parent).parent
+                    );
                 }}
             >
                 <div
@@ -116,7 +123,10 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                     onClick={() => {
                         setIsCreatingNewFolder(false);
                         handleParentSelect(parent);
-                        handleIsOpenStates(parent, true);
+                        handleIsOpenStates(
+                            directoryStructure.find((directory) => directory.parent.name === parent).parent,
+                            true
+                        );
                     }}
                     style={
                         isSelected[parent]?.parent
@@ -126,7 +136,7 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                             : null
                     }
                 >
-                    {isEditingFolder && !editingFolder.child && editingFolder.parent === parent ? (
+                    {isEditingFolder && editingFolder.type === 'parent' && editingFolder.name === parent ? (
                         <li className="overflow-hidden pl-1 w-full">
                             <div className="border-2 border-solid border-blue-400 rounded-md">
                                 <form
@@ -171,24 +181,38 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                                     }}
                                 >
                                     <form
-                                        onSubmit={(e) => {
+                                        onSubmit={async (e) => {
                                             e.preventDefault();
                                             if (
-                                                directoryStructure[index].children.includes(newFolderNameInputValue) ||
+                                                directoryStructure[index].children
+                                                    .map((child) => child.name)
+                                                    .includes(newFolderNameInputValue) ||
                                                 newFolderNameInputValue === ''
                                             ) {
                                                 return;
                                             }
                                             const newStates = [...directoryStructure];
-                                            newStates[index].children.push(newFolderNameInputValue);
+                                            newStates[index].children.push({
+                                                type: 'child',
+                                                parentId: newStates[index].parent.id,
+                                                name: newFolderNameInputValue,
+                                                id: undefined,
+                                                url: '',
+                                            });
                                             setDirectoryStructure(newStates);
                                             setNewFolderNameInputValue('');
                                             setIsCreatingNewFolder(false);
-                                            global.ipcRenderer.send(
+                                            const status = (await global.ipcRenderer.invoke(
                                                 'create-new-folder',
                                                 newStates[index]?.parent,
                                                 newFolderNameInputValue
-                                            );
+                                            )) as number;
+                                            if (status === 201) {
+                                                const allFolders = (await global.ipcRenderer.invoke(
+                                                    'get-all-folders'
+                                                )) as DirectoryStructure[];
+                                                setDirectoryStructure(allFolders);
+                                            }
                                         }}
                                     >
                                         <input
@@ -202,31 +226,28 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                                 </div>
                             )}
                         {directoryStructure
-                            .find((directory) => directory.parent === parent)
+                            .find((directory) => directory.parent.name === parent)
                             .children.map((child, index) => {
                                 return (
                                     <div
-                                        key={child}
+                                        key={index}
                                         className="pl-4 my-1 flex before:content-['>']"
                                         onClick={async (e) => {
                                             e.stopPropagation();
                                             setIsCreatingNewFolder(false);
-                                            getWords(parent, child);
-                                            setOpenedFolder({
-                                                parent: parent,
-                                                folder: child,
-                                                url: directoryStructure
-                                                    .find((directory) => directory.parent === parent)
-                                                    .urls.find((url) => {
-                                                        return url.folderName === child;
-                                                    }).url,
-                                            });
+                                            getWords(child.id);
+                                            setOpenedFolder(child);
                                             handleChildrenSelect(parent, index);
                                             setEditFolder({ isEditingFolder: false });
                                         }}
                                         onContextMenu={(e) => {
-                                            if (isEditingFolder && editingFolder.child === child) return;
-                                            handleChildContextMenu(e, parent, child);
+                                            if (
+                                                isEditingFolder &&
+                                                editingFolder.type === 'child' &&
+                                                editingFolder.id === child.id
+                                            )
+                                                return;
+                                            handleChildContextMenu(e, child);
                                         }}
                                         style={
                                             isSelected[parent]?.children[index]
@@ -237,8 +258,8 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                                         }
                                     >
                                         {isEditingFolder &&
-                                        editingFolder.child === child &&
-                                        editingFolder.parent === parent ? (
+                                        editingFolder.type === 'child' &&
+                                        editingFolder.id === child.id ? (
                                             <li className="pl-1  cursor-pointer w-full">
                                                 <div className="border-2 border-solid border-blue-400 rounded-md">
                                                     <form
@@ -262,7 +283,9 @@ const Collapse: React.FC<Props> = ({ index, parent }) => {
                                             </li>
                                         ) : (
                                             <li className="ml-1  cursor-pointer">
-                                                <span className="text-lg inline-block whitespace-nowrap">{child}</span>
+                                                <span className="text-lg inline-block whitespace-nowrap">
+                                                    {child.name}
+                                                </span>
                                             </li>
                                         )}
                                     </div>

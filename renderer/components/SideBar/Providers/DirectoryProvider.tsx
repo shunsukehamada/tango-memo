@@ -19,7 +19,7 @@ const DirectoryProvider: React.FC<Props> = ({ children }) => {
     const [directoryStructure, setDirectoryStructure] = useState<DirectoryStructure[]>([]);
     useEffect(() => {
         const getAllFolders = async () => {
-            const allFolders = await global.ipcRenderer.invoke('get-all-folders');
+            const allFolders = (await global.ipcRenderer.invoke('get-all-folders')) as DirectoryStructure[];
             setDirectoryStructure(allFolders);
         };
         getAllFolders();

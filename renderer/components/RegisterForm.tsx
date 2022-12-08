@@ -1,4 +1,3 @@
-import { useTheme } from 'next-themes';
 import { Ref, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { RiPencilFill } from 'react-icons/ri';
@@ -6,7 +5,7 @@ import Select from 'react-select';
 import { PoSsType } from '../pages/register';
 import { Word } from './List/List';
 import { editListItemContext } from './List/Providers/EditListItemProvider';
-import { DirectoryStructure } from './SideBar/SideBar';
+import { ChildDirectory, DirectoryStructure } from './SideBar/SideBar';
 
 type Inputs = {
     english: string;
@@ -18,7 +17,7 @@ type Inputs = {
 
 type Folder = {
     label: string;
-    value: { parent: string; child: string };
+    value: ChildDirectory;
 };
 
 type Props = {
@@ -31,7 +30,6 @@ const RegisterForm: React.FC<Props> = ({ word, close }) => {
     const [directoryStructureState, setDirectoryStructureState] = useState<DirectoryStructure[]>([]);
     const [defaultFolder, setDefaultFolder] = useState<Folder>();
     const [rows, setRows] = useState<number>(1);
-    const { theme } = useTheme();
 
     useEffect(() => {
         const getAllFolders = async () => {
@@ -61,8 +59,8 @@ const RegisterForm: React.FC<Props> = ({ word, close }) => {
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         global.ipcRenderer.send('edit-word', data, word?.id);
         if (
-            defaultFolder.value.parent === data.folder.value.parent &&
-            defaultFolder.value.child === data.folder.value.child
+            defaultFolder.value.parentId === data.folder.value.parentId &&
+            defaultFolder.value.id === data.folder.value.id
         ) {
             editItems({ ...word, english: data.english, japanese: data.japanese, annotation: data.annotation });
         } else {
@@ -95,18 +93,18 @@ const RegisterForm: React.FC<Props> = ({ word, close }) => {
         );
     }, [watch('japanese')]);
 
-    const options = [
-        ...directoryStructureState.map((directory) => {
-            return {
-                label: directory.parent,
-                options: [
-                    ...directory.children.map((folder) => {
-                        return { label: folder, value: { parent: directory.parent, child: folder } };
-                    }),
-                ],
-            };
-        }),
-    ];
+    const options = [...directoryStructureState].map((directory) => {
+        return {
+            label: directory.parent.name,
+            options: [...directory.children].map((folder) => {
+                return {
+                    label: folder.name,
+                    value: folder,
+                };
+            }),
+        };
+    });
+
     const formRef = useRef();
     const textAreaRef = useRef<HTMLTextAreaElement>();
     const reactHookFormJapaneseRef = register('japanese').ref;

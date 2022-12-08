@@ -13,6 +13,7 @@ import { PoSs, PoSsType } from '../../pages/register';
 import DeleteModal, { handleConfirm, ModalResolveType } from '../DeleteModal';
 import { filterContext } from '../Header/FilterProvider';
 import { valueContext } from '../Header/SearchWordsProvider';
+import { directoryContext } from '../SideBar/Providers/DirectoryProvider';
 
 export type Word = {
     id: number;
@@ -49,6 +50,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
         const [removed] = items.splice(startIndex, 1);
         items.splice(endIndex, 0, removed);
     };
+    const directoryStructure = useContext(directoryContext);
 
     useEffect(() => {
         setIsBrowser(process.browser);
@@ -128,10 +130,14 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                         <div className="text-lg font-bold mt-1 flex justify-between">
                             <div className="ml-5">
                                 <span>
-                                    {openedFolder.parent}
-                                    <span className="mx-3">&gt;</span>
-                                    {openedFolder.folder}
+                                    {
+                                        directoryStructure.find((directory) => {
+                                            return directory.parent.id === openedFolder.parentId;
+                                        })?.parent.name
+                                    }
                                 </span>
+                                <span className="mx-3">&gt;</span>
+                                <span> {openedFolder.name}</span>
                             </div>
                             {openedFolder.url && (
                                 <div className="mr-5">

@@ -9,34 +9,18 @@ import prepareNext from 'electron-next';
 import sqlite3 from 'sqlite3';
 import { IpcMainEvent, IpcMainInvokeEvent } from 'electron/main';
 
+type ChildDirectory = { type: 'child'; id: number; name: string; parentId: number; url: string };
+type ParentDirectory = { type: 'parent'; id: number; name: string };
 type DirectoryStructure = {
-    parent: string;
-    children: string[];
-    urls: URL[];
+    parent: ParentDirectory;
+    children: ChildDirectory[];
 };
-
-type URL = {
-    folderId: number;
-    folderName: string;
-    url: string;
-};
-
 type Word = {
     id: number;
     english: string;
     japanese: string;
 };
-
-export type PoSsType =
-    | 'Noun'
-    | 'Verb'
-    | 'Adjective'
-    | 'Adverb'
-    | 'Conjunction'
-    | 'Pronoun'
-    | 'Preposition'
-    | 'Interjection';
-
+type PoSsType = 'Noun' | 'Verb' | 'Adjective' | 'Adverb' | 'Conjunction' | 'Pronoun' | 'Preposition' | 'Interjection';
 type Inputs = {
     english: string;
     japanese: string;
@@ -44,10 +28,9 @@ type Inputs = {
     folder: Folder;
     pos: PoSsType[];
 };
-
 type Folder = {
     label: string;
-    value: { parent: string; child: string };
+    value: ChildDirectory;
 };
 
 // Prepare the renderer once the app is ready
@@ -110,14 +93,14 @@ ipcMain.handle('sample', async () => {
     // setTimeout(() => event.sender.send('message', 'hi from electron'), 500)
 });
 
-ipcMain.handle('get-all-folders', async () => {
+ipcMain.handle('get-all-folders', async (): Promise<DirectoryStructure[]> => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
     const parentFolders: { id: number; name: string }[] = await new Promise((resolve, reject) => {
-        db.all('select * from parent_folders', (err, rows) => {
+        db.all('select * from parent_folders', (err: Error | null, rows: { id: number; name: string }[]) => {
             if (err) {
                 reject(err);
             }
@@ -126,24 +109,33 @@ ipcMain.handle('get-all-folders', async () => {
     });
     const directoryStructure: DirectoryStructure[] = [];
     for (const parentFolder of parentFolders) {
-        const folders: { id: number; name: string; parent_id: number; url: string }[] = await new Promise(
-            (resolve, reject) => {
-                db.all('select * from folders where parent_id = ?', parentFolder.id, (err, rows) => {
+        const folders: ChildDirectory[] = await new Promise<ChildDirectory[]>((resolve, reject) => {
+            db.all(
+                'select * from folders where parent_id = ?',
+                parentFolder.id,
+                (
+                    err: Error | null,
+                    rows: {
+                        id: number;
+                        name: string;
+                        parent_id: number;
+                        url: string;
+                    }[]
+                ) => {
                     if (err) {
                         reject(err);
                     }
-                    resolve(rows);
-                });
-            }
-        );
+                    resolve(
+                        rows.map((row) => {
+                            return { ...row, parentId: row.parent_id, type: 'child' };
+                        })
+                    );
+                }
+            );
+        });
         const directory: DirectoryStructure = {
-            parent: parentFolder.name,
-            children: folders.map((folder) => {
-                return folder.name;
-            }),
-            urls: folders.map((folder) => {
-                return { folderId: folder.id, folderName: folder.name, url: folder.url };
-            }),
+            parent: { name: parentFolder.name, id: parentFolder.id, type: 'parent' },
+            children: folders,
         };
         directoryStructure.push(directory);
     }
@@ -152,39 +144,14 @@ ipcMain.handle('get-all-folders', async () => {
     return directoryStructure;
 });
 
-ipcMain.handle('get-words', async (_e, parentFolder: string, folder: string): Promise<Word[]> => {
+ipcMain.handle('get-words', async (_e, id: number): Promise<Word[]> => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    const parentId: number = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from parent_folders where name = ?',
-            parentFolder,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
-    });
-    const folderId: number = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from folders where parent_id = ? and name = ?',
-            parentId,
-            folder,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
-    });
     const words = await new Promise<(Word & { poss: string[] })[]>((resolve, reject) => {
-        db.all('select * from words where folder_id = ?', folderId, async (err: Error | null, rows: Word[]) => {
+        db.all('select * from words where folder_id = ?', id, async (err: Error | null, rows: Word[]) => {
             if (err) {
                 reject(err);
             }
@@ -236,35 +203,10 @@ ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, fold
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    const parentId: number = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from parent_folders where name = ?',
-            folder.value.parent,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
-    });
-    const folderId: number = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from folders where parent_id = ? and name = ?',
-            parentId,
-            folder.label,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
-    });
     const id: number = await new Promise<number>((resolve, reject) => {
         db.run(
             'insert into words(english, japanese, annotation, folder_id) values(?, ?, ?, ?)',
-            [english, japanese, annotation, folderId],
+            [english, japanese, annotation, folder.value.id],
             function (err) {
                 if (err) {
                     reject(err);
@@ -290,38 +232,34 @@ ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, fold
     }
 });
 
-ipcMain.on('create-new-parent-folder', (_e, folder: string) => {
+ipcMain.handle('create-new-parent-folder', async (_e: Electron.IpcMainInvokeEvent, folder: string) => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    db.run('insert into parent_folders(name) values(?)', folder);
+    await new Promise<void>((resolve, reject) => {
+        db.run('insert into parent_folders(name) values(?)', folder, (err) => {
+            if (err) reject(err);
+            resolve();
+        });
+    });
+    return 201;
 });
 
-ipcMain.on('create-new-folder', async (_e, parentFolder: string, folder: string) => {
+ipcMain.handle('create-new-folder', async (_e, parentFolder: ParentDirectory, folder: string) => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    const parentId = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from parent_folders where name = ?',
-            parentFolder,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
+    await new Promise<void>((resolve, reject) => {
+        db.run('insert into folders(name, parent_id) values(?, ?)', [folder, parentFolder.id], (err) => {
+            if (err) reject(err);
+            resolve();
+        });
     });
-    db.run('insert into folders(name, parent_id) values(?, ?)', [folder, parentId], (err) => {
-        if (err) {
-            console.error(err);
-        }
-    });
+    return 201;
 });
 
 ipcMain.on('delete-word', async (_e: IpcMainEvent, id: number) => {
@@ -351,34 +289,9 @@ ipcMain.on(
                 : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
         );
         const editWord = async () => {
-            const parentId: number = await new Promise<number>((resolve, reject) => {
-                db.get(
-                    'select id from parent_folders where name = ?',
-                    folder.value.parent,
-                    (err: Error | null, row: { id: number }) => {
-                        if (err) {
-                            reject(err);
-                        }
-                        resolve(row.id);
-                    }
-                );
-            });
-            const folderId: number = await new Promise<number>((resolve, reject) => {
-                db.get(
-                    'select id from folders where parent_id = ? and name = ?',
-                    parentId,
-                    folder.label,
-                    (err: Error | null, row: { id: number }) => {
-                        if (err) {
-                            reject(err);
-                        }
-                        resolve(row.id);
-                    }
-                );
-            });
             db.run(
                 'update words set english = ?, japanese = ?, annotation = ?, folder_id = ? where id = ?',
-                [english, japanese, annotation, folderId, id],
+                [english, japanese, annotation, folder.value.id, id],
                 (err) => {
                     if (err) {
                         console.error(err);
@@ -423,77 +336,24 @@ ipcMain.handle('get-folder', async (_e: IpcMainInvokeEvent, id: number): Promise
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    const [folderName, parentId] = await new Promise<[string, number]>((resolve, reject) => {
+    const [folderName, parentId, url] = await new Promise<[string, number, string | null]>((resolve, reject) => {
         db.get(
-            'select name, parent_id from folders where id = ?',
+            'select * from folders where id = ?',
             id,
-            (err: Error | null, row: { name: string; parent_id: number }) => {
+            (err: Error | null, row: { name: string; parent_id: number; id: number; url: string | null }) => {
                 if (err) {
                     reject(err);
                 }
-                resolve([row.name, row.parent_id]);
+                resolve([row.name, row.parent_id, row.url]);
             }
         );
-    });
-    const parentName = await new Promise<string>((resolve, reject) => {
-        db.get('select name from parent_folders where id = ?', parentId, (err: Error | null, row: { name: string }) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(row.name);
-        });
     });
     return {
         label: folderName,
-        value: { parent: parentName, child: folderName },
+        // value: { parent: parentName, child: folderName, id: id },
+        value: { parentId: parentId, name: folderName, id: id, url: url ? url : '', type: 'child' },
     };
 });
-
-const getFolderId = async (db: sqlite3.Database, parentName: string, childName: string): Promise<number> => {
-    const parentId: number = await new Promise<number>((resolve, reject) => {
-        db.get('select id from parent_folders where name = ?', parentName, (err: Error | null, row: { id: number }) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(row.id);
-        });
-    });
-    const folderId: number = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from folders where parent_id = ? and name = ?',
-            parentId,
-            childName,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
-    });
-    return folderId;
-};
-
-const getFolderIds = async (db: sqlite3.Database, parentName: string): Promise<[number, number[]]> => {
-    const parentId: number = await new Promise<number>((resolve, reject) => {
-        db.get('select id from parent_folders where name = ?', parentName, (err: Error | null, row: { id: number }) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(row.id);
-        });
-    });
-    const folderIds = await new Promise<number[]>((resolve, reject) => {
-        db.all('select id from folders where parent_id = ?', parentId, (err: Error | null, rows: { id: number }[]) => {
-            if (err) {
-                reject(err);
-            }
-
-            resolve(rows.map((row) => row.id));
-        });
-    });
-    return [parentId, folderIds];
-};
 
 const deleteWordsAndPos = (db: sqlite3.Database, wordId: number): void => {
     db.run('delete from words where id = ?', wordId, (err) => {
@@ -528,36 +388,36 @@ const deleteChildFolder = async (db: sqlite3.Database, folderId: number) => {
     }
 };
 
-ipcMain.on(
-    'delete-child-folder',
-    async (
-        _e: IpcMainEvent,
-        {
-            parent,
-            child,
-        }: {
-            parent: string;
-            child: string;
-        }
-    ) => {
-        const db = new sqlite3.Database(
-            isDev
-                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
-        );
-        const folderId = await getFolderId(db, parent, child);
-        deleteChildFolder(db, folderId);
-    }
-);
-
-ipcMain.on('delete-parent-folder', async (_e: IpcMainEvent, { parent }) => {
+ipcMain.on('delete-child-folder', async (_e: IpcMainEvent, directory: ChildDirectory) => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    const [parentId, folderIds] = await getFolderIds(db, parent);
-    db.run('delete from parent_folders where id = ?', parentId, (err) => {
+    deleteChildFolder(db, directory.id);
+});
+
+ipcMain.on('delete-parent-folder', async (_e: IpcMainEvent, directory: ParentDirectory) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    // const [parentId, folderIds] = await getFolderIds(db, directory);
+    const folderIds = await new Promise<number[]>((resolve, reject) => {
+        db.all(
+            'select id from folders where parent_id = ?',
+            directory.id,
+            (err: Error | null, rows: { id: number }[]) => {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve(rows.map((row) => row.id));
+            }
+        );
+    });
+    db.run('delete from parent_folders where id = ?', directory.id, (err) => {
         if (err) {
             console.error(err);
         }
@@ -567,34 +427,30 @@ ipcMain.on('delete-parent-folder', async (_e: IpcMainEvent, { parent }) => {
     }
 });
 
-ipcMain.on('change-parent-folder', async (_e: IpcMainEvent, editingFolder: { parent: string }, folder: string) => {
+ipcMain.on('change-parent-folder', async (_e: IpcMainEvent, id: number, name: string) => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    db.run('update parent_folders set name = ? where name = ?', [folder, editingFolder.parent], (err) => {
+    db.run('update parent_folders set name = ? where id = ?', [name, id], (err) => {
         if (err) {
             console.error(err);
         }
     });
 });
-ipcMain.on(
-    'change-child-folder',
-    async (_e: IpcMainEvent, { parent, child }: { parent: string; child: string }, folder: string) => {
-        const db = new sqlite3.Database(
-            isDev
-                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
-        );
-        const id = await getFolderId(db, parent, child);
-        db.run('update folders set name = ? where id = ?', [folder, id], (err) => {
-            if (err) {
-                console.error(err);
-            }
-        });
-    }
-);
+ipcMain.on('change-child-folder', async (_e: IpcMainEvent, id: number, name: string) => {
+    const db = new sqlite3.Database(
+        isDev
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+    );
+    db.run('update folders set name = ? where id = ?', [name, id], (err) => {
+        if (err) {
+            console.error(err);
+        }
+    });
+});
 
 ipcMain.handle(
     'get-suggestion',
@@ -691,40 +547,17 @@ ipcMain.handle('get-word-info', async (_e: IpcMainInvokeEvent, id: number) => {
     return { japanese, poss };
 });
 
-ipcMain.on('set-url', async (_e: Electron.IpcMainEvent, folder: { parent: string; child: string }, url: string) => {
+ipcMain.handle('set-url', async (_e: Electron.IpcMainInvokeEvent, folder: ChildDirectory, url: string) => {
     const db = new sqlite3.Database(
         isDev
             ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
             : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
     );
-    const parentId: number = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from parent_folders where name = ?',
-            folder.parent,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
+    await new Promise<void>((resolve, reject) => {
+        db.run('update folders set url = ? where id = ?', [url, folder.id], (err) => {
+            if (err) reject(err);
+            resolve();
+        });
     });
-    const folderId: number = await new Promise<number>((resolve, reject) => {
-        db.get(
-            'select id from folders where parent_id = ? and name = ?',
-            parentId,
-            folder.child,
-            (err: Error | null, row: { id: number }) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(row.id);
-            }
-        );
-    });
-    db.run('update folders set url = ? where id = ?', [url, folderId], (err) => {
-        if (err) {
-            console.error(err);
-        }
-    });
+    return 201;
 });
