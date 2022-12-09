@@ -2,10 +2,6 @@ import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { useRouter } from 'next/router';
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
-import { GetServerSideProps } from 'next';
-import { resetServerContext } from 'react-beautiful-dnd';
-import { useTheme } from 'next-themes';
-('next/router');
 
 // export const getServerSideProps: GetServerSideProps = async () => {
 //     resetServerContext();
@@ -16,13 +12,7 @@ const IndexPage = () => {
     const router = useRouter();
     const [isTransitioned, setIsTransitioned] = useState(false);
     const animationControl = useAnimationControls();
-    const { theme } = useTheme();
     useEffect(() => {
-        const handleMessage = (_event, args) => alert(args);
-
-        // add a listener to 'message' channel
-        global.ipcRenderer.addListener('message', handleMessage);
-
         if (typeof document !== 'undefined') {
             document.addEventListener('wheel', (e) => {
                 if (e.deltaX >= 40) {
