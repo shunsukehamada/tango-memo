@@ -143,7 +143,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                 <div className="mr-5">
                                     <span>外部リンク: </span>
                                     <a href={openedFolder.url}>
-                                        <span>{openedFolder.url}</span>
+                                        <span className="italic">{openedFolder.url}</span>
                                     </a>
                                 </div>
                             )}
