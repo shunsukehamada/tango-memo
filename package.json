@@ -14,7 +14,7 @@
         "pack-app": "npm run build && electron-builder --dir",
         "dist": "npm run build && electron-builder",
         "type-check": "tsc -p ./renderer/tsconfig.json && tsc -p ./electron-src/tsconfig.json",
-        "build-db": "cd db && sqlite3 sample.db < schema.sql && sqlite3 sample.db < sample.sql && ts-node db.ts"
+        "build-db": "cd db && sqlite3 database.db < schema.sql && sqlite3 database.db < database.sql && ts-node db.ts"
     },
     "dependencies": {
         "@tailwindcss/line-clamp": "^0.4.2",

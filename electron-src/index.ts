@@ -70,34 +70,11 @@ app.on('ready', async () => {
 // Quit the app once all windows are closed
 app.on('window-all-closed', app.quit);
 
-// listen the channel `message` and resend the received message to the renderer process
-ipcMain.handle('sample', async () => {
-    const db = new sqlite3.Database(
-        isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
-    );
-
-    const words: { id: number; english: string; japanese: string }[] = await new Promise<
-        { id: number; english: string; japanese: string }[]
-    >((resolve, reject) => {
-        db.all('select * from words limit 5', (err, rows) => {
-            if (err) {
-                reject(err);
-            }
-            resolve(rows as { id: number; english: string; japanese: string }[]);
-        });
-    });
-    db.close();
-    return words;
-    // setTimeout(() => event.sender.send('message', 'hi from electron'), 500)
-});
-
 ipcMain.handle('get-all-folders', async (): Promise<DirectoryStructure[]> => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     const parentFolders: { id: number; name: string }[] = await new Promise((resolve, reject) => {
         db.all('select * from parent_folders', (err: Error | null, rows: { id: number; name: string }[]) => {
@@ -147,8 +124,8 @@ ipcMain.handle('get-all-folders', async (): Promise<DirectoryStructure[]> => {
 ipcMain.handle('get-words', async (_e, id: number): Promise<Word[]> => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     const words = await new Promise<(Word & { poss: string[] })[]>((resolve, reject) => {
         db.all('select * from words where folder_id = ?', id, async (err: Error | null, rows: Word[]) => {
@@ -200,8 +177,8 @@ ipcMain.handle('get-words', async (_e, id: number): Promise<Word[]> => {
 ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, folder, pos }: Inputs) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     const id: number = await new Promise<number>((resolve, reject) => {
         db.run(
@@ -235,8 +212,8 @@ ipcMain.on('register-new-word', async (_e, { english, japanese, annotation, fold
 ipcMain.handle('create-new-parent-folder', async (_e: Electron.IpcMainInvokeEvent, folder: string) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     await new Promise<void>((resolve, reject) => {
         db.run('insert into parent_folders(name) values(?)', folder, (err) => {
@@ -250,8 +227,8 @@ ipcMain.handle('create-new-parent-folder', async (_e: Electron.IpcMainInvokeEven
 ipcMain.handle('create-new-folder', async (_e, parentFolder: ParentDirectory, folder: string) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     await new Promise<void>((resolve, reject) => {
         db.run('insert into folders(name, parent_id) values(?, ?)', [folder, parentFolder.id], (err) => {
@@ -265,8 +242,8 @@ ipcMain.handle('create-new-folder', async (_e, parentFolder: ParentDirectory, fo
 ipcMain.on('delete-word', async (_e: IpcMainEvent, id: number) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     db.run('delete from words where id = ?', id, (err) => {
         if (err) {
@@ -285,8 +262,8 @@ ipcMain.on(
     async (_e: IpcMainEvent, { english, japanese, annotation, folder, pos }: Inputs, id: number) => {
         const db = new sqlite3.Database(
             isDev
-                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+                : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
         );
         const editWord = async () => {
             db.run(
@@ -333,8 +310,8 @@ ipcMain.on(
 ipcMain.handle('get-folder', async (_e: IpcMainInvokeEvent, id: number): Promise<Folder> => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     const [folderName, parentId, url] = await new Promise<[string, number, string | null]>((resolve, reject) => {
         db.get(
@@ -391,8 +368,8 @@ const deleteChildFolder = async (db: sqlite3.Database, folderId: number) => {
 ipcMain.on('delete-child-folder', async (_e: IpcMainEvent, directory: ChildDirectory) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     deleteChildFolder(db, directory.id);
 });
@@ -400,8 +377,8 @@ ipcMain.on('delete-child-folder', async (_e: IpcMainEvent, directory: ChildDirec
 ipcMain.on('delete-parent-folder', async (_e: IpcMainEvent, directory: ParentDirectory) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     // const [parentId, folderIds] = await getFolderIds(db, directory);
     const folderIds = await new Promise<number[]>((resolve, reject) => {
@@ -430,8 +407,8 @@ ipcMain.on('delete-parent-folder', async (_e: IpcMainEvent, directory: ParentDir
 ipcMain.on('change-parent-folder', async (_e: IpcMainEvent, id: number, name: string) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     db.run('update parent_folders set name = ? where id = ?', [name, id], (err) => {
         if (err) {
@@ -442,8 +419,8 @@ ipcMain.on('change-parent-folder', async (_e: IpcMainEvent, id: number, name: st
 ipcMain.on('change-child-folder', async (_e: IpcMainEvent, id: number, name: string) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     db.run('update folders set name = ? where id = ?', [name, id], (err) => {
         if (err) {
@@ -457,16 +434,8 @@ ipcMain.handle(
     async (_e: IpcMainInvokeEvent, value: string): Promise<{ id: number; word: string }[]> => {
         const db = new sqlite3.Database(
             isDev
-                ? path.join(
-                      process.env['HOME']!,
-                      'Documents',
-                      'electron',
-                      'tango-memo',
-                      'db',
-                      'supplement',
-                      'suggest.db'
-                  )
-                : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+                ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'suggest.db')
+                : path.join(process.env['HOME']!, 'tango-memo', 'suggest.db')
         );
         const exact = await new Promise<{ id: number; word: string } | undefined>((resolve, reject) => {
             db.get(
@@ -509,8 +478,8 @@ ipcMain.handle(
 ipcMain.handle('get-word-info', async (_e: IpcMainInvokeEvent, id: number) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'supplement', 'suggest.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'suggest.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'suggest.db')
     );
     const japanese = await new Promise<string>((resolve, reject) => {
         db.get('select japanese from words where id = ?', id, (err: Error | null, row: { japanese: string }) => {
@@ -550,8 +519,8 @@ ipcMain.handle('get-word-info', async (_e: IpcMainInvokeEvent, id: number) => {
 ipcMain.handle('set-url', async (_e: Electron.IpcMainInvokeEvent, folder: ChildDirectory, url: string) => {
     const db = new sqlite3.Database(
         isDev
-            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'sample.db')
-            : path.join(process.env['HOME']!, 'tango-memo', 'sample.db')
+            ? path.join(process.env['HOME']!, 'Documents', 'electron', 'tango-memo', 'db', 'database.db')
+            : path.join(process.env['HOME']!, 'tango-memo', 'database.db')
     );
     await new Promise<void>((resolve, reject) => {
         db.run('update folders set url = ? where id = ?', [url, folder.id], (err) => {
