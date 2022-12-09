@@ -140,7 +140,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                                 <span> {openedFolder.name}</span>
                             </div>
                             {openedFolder.url && (
-                                <div className="mr-5">
+                                <div className="mr-5 truncate" style={{ width: '450px' }}>
                                     <span>外部リンク: </span>
                                     <a href={openedFolder.url}>
                                         <span className="italic">{openedFolder.url}</span>
