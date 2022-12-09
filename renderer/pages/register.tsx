@@ -74,7 +74,7 @@ const Register: React.FC = () => {
             const allFolders = (await global.ipcRenderer.invoke('get-all-folders')) as DirectoryStructure[];
             setDirectoryStructureState(allFolders);
         };
-        animationControl.start({ x: ['10%', '0%'], opacity: [0, 1], transition: { duration: 0.25 } });
+        animationControl.start({ x: '0%', opacity: 1 });
         getAllFolders();
     }, []);
 
@@ -83,8 +83,7 @@ const Register: React.FC = () => {
             if (isTransitioned) {
                 await animationControl.start({
                     x: '50%',
-                    opacity: [1, 1, 0.25, 0],
-                    transition: { duration: 0.25 },
+                    opacity: 0,
                 });
                 router.push('/');
             }
@@ -154,7 +153,11 @@ const Register: React.FC = () => {
     return (
         <>
             <AnimatePresence mode="wait">
-                <motion.div animate={animationControl}>
+                <motion.div
+                    animate={animationControl}
+                    initial={{ opacity: 0, x: '5%' }}
+                    transition={{ duration: '0.2' }}
+                >
                     <div className="h-screen w-screen overflow-hidden flex justify-center items-center">
                         <form
                             onSubmit={handleSubmit(onSubmit)}

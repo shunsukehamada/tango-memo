@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { GetServerSideProps } from 'next';
 import { resetServerContext } from 'react-beautiful-dnd';
+import { useTheme } from 'next-themes';
 ('next/router');
 
 // export const getServerSideProps: GetServerSideProps = async () => {
@@ -15,6 +16,7 @@ const IndexPage = () => {
     const router = useRouter();
     const [isTransitioned, setIsTransitioned] = useState(false);
     const animationControl = useAnimationControls();
+    const { theme } = useTheme();
     useEffect(() => {
         const handleMessage = (_event, args) => alert(args);
 
@@ -29,7 +31,7 @@ const IndexPage = () => {
             });
         }
 
-        animationControl.start({ x: ['-10%', '0%'], opacity: [0, 1], transition: { duration: 0.25 } });
+        animationControl.start({ x: '0%', opacity: 1 });
     }, []);
 
     useEffect(() => {
@@ -37,8 +39,7 @@ const IndexPage = () => {
             if (isTransitioned) {
                 await animationControl.start({
                     x: '-50%',
-                    opacity: [1, 1, 0.25, 0],
-                    transition: { duration: 0.25 },
+                    opacity: 0,
                 });
                 router.push('/register');
             }
@@ -48,7 +49,11 @@ const IndexPage = () => {
     return (
         <>
             <AnimatePresence mode="wait">
-                <motion.div animate={animationControl}>
+                <motion.div
+                    initial={{ opacity: 0, x: '-5%' }}
+                    animate={animationControl}
+                    transition={{ duration: 0.2 }}
+                >
                     <Layout />
                 </motion.div>
             </AnimatePresence>
