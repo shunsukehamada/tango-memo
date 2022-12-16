@@ -150,7 +150,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                         </div>
                     )}
                     {view === 'list' ? (
-                        <div className="flex flex-col h-screen">
+                        <div className="flex flex-col h-screen mr-5">
                             <div className="flex justify-evenly">
                                 <div className="w-1/2 m-2 mx-10 flex items-center">
                                     <span className="text-lg font-bold select-none">単語</span>
@@ -214,7 +214,7 @@ const List: React.FC<Props> = ({ view, isHidden }) => {
                     ) : (
                         <div className="mt-2 h-screen">
                             <div
-                                className="flex flex-wrap overflow-y-scroll -mt-3 scrollbar-hide"
+                                className="flex flex-wrap overflow-y-scroll -mt-3 scrollbar-hide justify-center items-center"
                                 style={{ height: '90%' }}
                             >
                                 {items.map((item, index) => {

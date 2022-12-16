@@ -11,7 +11,7 @@ type Props = {
 const ListItemCard = ({ word, isHidden, handleContextMenu, onClick }: Props) => {
     return (
         <div
-            className="border-2 border-solid border-gray-400 m-2 w-60 rounded-lg max-h-32 group"
+            className="border-2 border-solid border-gray-400 mx-5 my-2 w-60 rounded-lg max-h-32 group"
             style={{ minWidth: '200px' }}
             onClick={() => {
                 onClick(word);
