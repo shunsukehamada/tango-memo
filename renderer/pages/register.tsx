@@ -49,6 +49,7 @@ const Register: React.FC = () => {
     const animationControl = useAnimationControls();
     const formRef = useRef();
     const textAreaRef = useRef<HTMLTextAreaElement>();
+    const englishRef = useRef<HTMLTextAreaElement>();
     const { theme } = useTheme();
 
     if (typeof document !== 'undefined') {
@@ -115,6 +116,7 @@ const Register: React.FC = () => {
         const folder = data.folder;
         reset();
         setValue('folder', folder);
+        englishRef.current.select();
     };
 
     const options = [
@@ -177,6 +179,7 @@ const Register: React.FC = () => {
                                 >
                                     <input
                                         {...register('english', { required: true })}
+                                        ref={useCombinedRefs(register('english').ref, englishRef)}
                                         className="w-full flex-1 border-b-2 border-gray-300 placeholder:font-bold placeholder:text-center focus:outline-0 focus:border-blue-500 text-center text-xl font-bold placeholder:select-none"
                                         style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
                                         placeholder={errors.english?.type === 'required' ? '英単語は必須です' : ''}
