@@ -52,6 +52,10 @@
         "files": [
             "main",
             "renderer/out"
-        ]
+        ],
+        "mac": {
+            "target": "dmg",
+            "icon": "./icon.png"
+        }
     }
 }
